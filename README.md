@@ -6,7 +6,7 @@ Golang library for PWR Chain RPC interactions
 To install the pwrgo library, run
 
 ```
-go get github.com/pwrlabs/pwrgo@v0.0.3
+go get github.com/pwrlabs/pwrgo@v0.0.4
 ```
 
 # Using the library
@@ -35,6 +35,7 @@ go run example.go
 - BlocksCount() int
 - ValidatorsCount() int
 - GetBlock(blockNumber int) Block
+- SetRpcNodeUrl(url string)
 
 ## Wallet operations
 - FromPrivateKey(privateKey string) PWRWallet
