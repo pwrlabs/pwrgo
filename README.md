@@ -6,7 +6,7 @@ Golang library for PWR Chain RPC interactions
 To install the pwrgo library, run
 
 ```
-go get github.com/pwrlabs/pwrgo@v0.0.4
+go get github.com/pwrlabs/pwrgo@v0.0.5
 ```
 
 # Using the library
