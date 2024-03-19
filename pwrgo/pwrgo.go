@@ -106,7 +106,8 @@ func TransferPWR(to string, amount string, nonce int, privateKey *ecdsa.PrivateK
     amt := new(big.Int)
     amt.SetString(amount, 10)
     var buffer []byte
-    buffer, err := txBytes(0, nonce, amt, to)
+    buffer,err := transferTxBytes(nonce, amt, to)
+
     if err != nil {
         log.Fatalf("Failed to get tx bytes ", err.Error())
     }
@@ -140,6 +141,270 @@ func TransferPWR(to string, amount string, nonce int, privateKey *ecdsa.PrivateK
 	transferResponse.TxHash = hash.Hex()
 	transferResponse.BlockNumber = blockNumber
     return transferResponse
+}
+
+func ClaimVMId(vmId int64, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+	if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+	}
+
+    var buffer []byte
+    buffer, err := claimVMIdBytes(vmId, nonce)
+	if err != nil {
+        log.Fatalf("Failed to get vm data bytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+    finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	claimTxResponse := parseRPCResponse(result)
+
+	if claimTxResponse.Message == "Txn broadcasted to validator nodes" {
+		claimTxResponse.Success = true
+	} else {
+		claimTxResponse.Success = false
+		claimTxResponse.Error = claimTxResponse.Message
+	}
+	
+	claimTxResponse.TxHash = hash.Hex()
+	claimTxResponse.BlockNumber = blockNumber
+    return claimTxResponse
+}
+
+func GetTransferTxBytes(to string, amount string, nonce int) ([]byte) {
+	amt := new(big.Int)
+    amt.SetString(amount, 10)
+    var buffer []byte
+    buffer,_ = transferTxBytes(nonce, amt, to)
+	return buffer
+}
+
+func Delegate(to string, amount string, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+	if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+    }
+
+    amt := new(big.Int)
+    amt.SetString(amount, 10)
+	var buffer []byte
+    buffer, err := delegateTxBytes(to, amt, nonce)
+    if err != nil {
+        log.Fatalf("Failed to get DelegateTx bytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+	finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	delegateTxResponse := parseRPCResponse(result)
+
+	if delegateTxResponse.Message == "Txn broadcasted to validator nodes" {
+		delegateTxResponse.Success = true
+	} else {
+		delegateTxResponse.Success = false
+		delegateTxResponse.Error = delegateTxResponse.Message
+	}
+	
+	delegateTxResponse.TxHash = hash.Hex()
+	delegateTxResponse.BlockNumber = blockNumber
+    return delegateTxResponse
+}
+
+func Withdraw(from string, amount string, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+	if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+    }
+
+    amt := new(big.Int)
+    amt.SetString(amount, 10)
+
+	var buffer []byte
+    buffer, err := withdrawTxBytes(from, amt, nonce)
+    if err != nil {
+        log.Fatalf("Failed to get withdrawTx bytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+	finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	withdrawTxResponse := parseRPCResponse(result)
+
+	if withdrawTxResponse.Message == "Txn broadcasted to validator nodes" {
+		withdrawTxResponse.Success = true
+	} else {
+		withdrawTxResponse.Success = false
+		withdrawTxResponse.Error = withdrawTxResponse.Message
+	}
+	
+	withdrawTxResponse.TxHash = hash.Hex()
+	withdrawTxResponse.BlockNumber = blockNumber
+    return withdrawTxResponse
+}
+
+
+func SetGuardian(guardian string, expiration string, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+	if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+    }
+
+    exp := new(big.Int)
+    exp.SetString(expiration, 10)
+
+	var buffer []byte
+    buffer, err := setGuardianTxBytes(guardian, exp, nonce)
+    if err != nil {
+        log.Fatalf("Failed to get setGuardian bytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+	finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	setGuardianTxResponse := parseRPCResponse(result)
+
+	if setGuardianTxResponse.Message == "Txn broadcasted to validator nodes" {
+		setGuardianTxResponse.Success = true
+	} else {
+		setGuardianTxResponse.Success = false
+		setGuardianTxResponse.Error = setGuardianTxResponse.Message
+	}
+	
+	setGuardianTxResponse.TxHash = hash.Hex()
+	setGuardianTxResponse.BlockNumber = blockNumber
+    return setGuardianTxResponse
+}
+
+func RemoveGuardian(nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+	if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+    }
+
+	var buffer []byte
+    buffer, err := txnBaseBytes(9, nonce)
+    if err != nil {
+        log.Fatalf("Failed to get txnBaseBytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+	finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	removeGuardianTxResponse := parseRPCResponse(result)
+
+	if removeGuardianTxResponse.Message == "Txn broadcasted to validator nodes" {
+		removeGuardianTxResponse.Success = true
+	} else {
+		removeGuardianTxResponse.Success = false
+		removeGuardianTxResponse.Error = removeGuardianTxResponse.Message
+	}
+	
+	removeGuardianTxResponse.TxHash = hash.Hex()
+	removeGuardianTxResponse.BlockNumber = blockNumber
+    return removeGuardianTxResponse
+}
+
+// TO-DO: Fix/test this function
+func SendConduitTx(vmId int64, tx []byte, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
+    if nonce < 0 {
+        log.Fatalf("Nonce cannot be negative ", nonce)
+    }
+
+    var buffer []byte
+    buffer, err := sendConduitTxBytes(vmId, nonce, tx)
+    if err != nil {
+        log.Fatalf("Failed to get vm data bytes ", err.Error())
+    }
+
+	signature, err := signMessage(buffer, privateKey)
+    if err != nil {
+        log.Fatalf("Failed to sign message ", err.Error())
+    }
+
+	var blockNumber = 0
+	if ReturnBlockNumberOnTx {
+		blockNumber = BlocksCount()
+	}
+
+    finalTxn := append(buffer, signature...)
+    var dataTx = hexutil.Encode(finalTxn)
+    var dataTxn = `{"txn":"` + dataTx[2:] + `"}`
+    var result = post(RPC_ENDPOINT + "/broadcast/", dataTxn)
+	hash := crypto.Keccak256Hash(finalTxn)
+
+	conduitTxResponse := parseRPCResponse(result)
+
+	if conduitTxResponse.Message == "Txn broadcasted to validator nodes" {
+		conduitTxResponse.Success = true
+	} else {
+		conduitTxResponse.Success = false
+		conduitTxResponse.Error = conduitTxResponse.Message
+	}
+	
+	conduitTxResponse.TxHash = hash.Hex()
+	conduitTxResponse.BlockNumber = blockNumber
+    return conduitTxResponse
 }
 
 func SendVMDataTx(vmId int64, data []byte, nonce int, privateKey *ecdsa.PrivateKey) (RPCResponse) {
