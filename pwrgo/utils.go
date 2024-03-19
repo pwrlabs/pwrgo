@@ -9,21 +9,97 @@ import (
 
 var RPC_ENDPOINT = "https://pwrrpc.pwrlabs.io"
 
-func txBytes(txType int, nonce int, amount *big.Int, recipient string) ([]byte, error) {
+func txnBaseBytes(txType int, nonce int) ([]byte, error){
    typeByte := decToBytes(txType, 1)
-   // TO-DO: Get ChainID from API instead of hard-coding it
    chainByte := decToBytes(0, 1)
-
    nonceBytes := decToBytes(nonce, 4)
+
+   paddedNonce := make([]byte, 4)
+   copy(paddedNonce[4-len(nonceBytes):], nonceBytes)
+
+   var txnBytes []byte
+   txnBytes = append(txnBytes, typeByte...)
+   txnBytes = append(txnBytes, chainByte...)
+   txnBytes = append(txnBytes, paddedNonce...)
+
+   return txnBytes, nil
+}
+
+func claimVMIdBytes(vmId int64, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(6, nonce);
+   vmIdBytes := decToBytes64(vmId, 8)
+
+   txnBytes = append(txnBytes, vmIdBytes...)
+
+   return txnBytes, nil
+}
+
+func delegateTxBytes(to string, amount *big.Int, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(3, nonce);
+
+   amountBytes := amount.Bytes()
+   paddedAmount := make([]byte, 8)
+   copy(paddedAmount[8-len(amountBytes):], amountBytes)
+   
+   recipientBytes, _ := hex.DecodeString(to[2:])
+   paddedRecipient := make([]byte, 20)
+   copy(paddedRecipient[20-len(recipientBytes):], recipientBytes)
+   
+   txnBytes = append(txnBytes, paddedAmount...)
+   txnBytes = append(txnBytes, paddedRecipient...)
+   return txnBytes, nil
+}
+
+func withdrawTxBytes(from string, amount *big.Int, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(4, nonce);
+
+   amountBytes := amount.Bytes()
+   paddedAmount := make([]byte, 8)
+   copy(paddedAmount[8-len(amountBytes):], amountBytes)
+   
+   recipientBytes, _ := hex.DecodeString(from[2:])
+   paddedRecipient := make([]byte, 20)
+   copy(paddedRecipient[20-len(recipientBytes):], recipientBytes)
+   
+   txnBytes = append(txnBytes, paddedAmount...)
+   txnBytes = append(txnBytes, paddedRecipient...)
+   return txnBytes, nil
+}
+
+func setGuardianTxBytes(guardian string, expiration *big.Int, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(8, nonce);
+
+   expirationBytes := expiration.Bytes()
+   paddedExpiration := make([]byte, 8)
+   copy(paddedExpiration[8-len(expirationBytes):], expirationBytes)
+   
+   recipientBytes, _ := hex.DecodeString(guardian[2:])
+   paddedRecipient := make([]byte, 20)
+   copy(paddedRecipient[20-len(recipientBytes):], recipientBytes)
+   
+   txnBytes = append(txnBytes, paddedExpiration...)
+   txnBytes = append(txnBytes, paddedRecipient...)
+   return txnBytes, nil
+}
+
+func sendConduitTxBytes(vmId int64, nonce int, txn []byte) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(11, nonce);
+   vmIdBytes := decToBytes64(vmId, 8)
+
+   txnBytes = append(txnBytes, vmIdBytes...)
+   txnBytes = append(txnBytes, txn...)
+
+   return txnBytes, nil
+}
+
+func transferTxBytes(nonce int, amount *big.Int, recipient string) ([]byte, error) { // TransferPWR()
+   txnBytes,_ := txnBaseBytes(0, nonce);
 
    amountBytes := amount.Bytes()
    recipientBytes, err := hex.DecodeString(recipient[2:])
    if err != nil {
       return nil, err
    }
-   
-   paddedNonce := make([]byte, 4)
-   copy(paddedNonce[4-len(nonceBytes):], nonceBytes)
 
    paddedAmount := make([]byte, 8)
    copy(paddedAmount[8-len(amountBytes):], amountBytes)
@@ -31,10 +107,6 @@ func txBytes(txType int, nonce int, amount *big.Int, recipient string) ([]byte, 
    paddedRecipient := make([]byte, 20)
    copy(paddedRecipient[20-len(recipientBytes):], recipientBytes)
    
-   var txnBytes []byte
-   txnBytes = append(txnBytes, typeByte...)
-   txnBytes = append(txnBytes, chainByte...)
-   txnBytes = append(txnBytes, paddedNonce...)
    txnBytes = append(txnBytes, paddedAmount...)
    txnBytes = append(txnBytes, paddedRecipient...)
    
@@ -42,16 +114,9 @@ func txBytes(txType int, nonce int, amount *big.Int, recipient string) ([]byte, 
 }
 
 func vmDataBytes(vmId int64, nonce int, data []byte) ([]byte, error) {
-   typeByte := decToBytes(5, 1)
-   nonceBytes := decToBytes(nonce, 4)
+   txnBytes,_ := txnBaseBytes(5, nonce)
    vmIdBytes := decToBytes64(vmId, 8)
 
-   paddedNonce := make([]byte, 4)
-   copy(paddedNonce[4-len(nonceBytes):], nonceBytes)
-   
-   var txnBytes []byte
-   txnBytes = append(txnBytes, typeByte...)
-   txnBytes = append(txnBytes, paddedNonce...)
    txnBytes = append(txnBytes, vmIdBytes...)
    txnBytes = append(txnBytes, data...)
    
