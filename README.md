@@ -36,6 +36,10 @@ go run example.go
 - ValidatorsCount() int
 - GetBlock(blockNumber int) Block
 - SetRpcNodeUrl(url string)
+- Delegate(toAddress string, amount int, PrivateKey)
+- Withdraw(fromAddress string, amount int, PrivateKey)
+- SetGuardian(guardianAddress string, expirationEpoch string, PrivateKey)
+- RemoveGuardian(PrivateKey)
 
 ## Wallet operations
 - FromPrivateKey(privateKey string) PWRWallet
