@@ -9,6 +9,18 @@ import (
 
 var RPC_ENDPOINT = "https://pwrrpc.pwrlabs.io"
 
+var TRANSFER_TYPE = 0
+var JOIN_TYPE = 1
+var CLAIM_ACTIVE_NODE_SPOT_TYPE = 2
+var DELEGATE_TYPE = 3
+var WITHDRAW_TYPE = 4
+var VM_DATA_TX_TYPE = 5
+var CLAIM_VM_ID_TYPE = 6
+var VALIDATOR_REMOVE_TYPE = 7
+var SET_GUARDIAN_TYPE = 8
+var SEND_GUARDIAN_WRAPPED_TX_TYPE = 10
+var SEND_CONDUIT_TX_TYPE = 11
+
 func txnBaseBytes(txType int, nonce int) ([]byte, error){
    typeByte := decToBytes(txType, 1)
    chainByte := decToBytes(0, 1)
@@ -26,7 +38,7 @@ func txnBaseBytes(txType int, nonce int) ([]byte, error){
 }
 
 func claimVMIdBytes(vmId int64, nonce int) ([]byte, error) {
-   txnBytes, _ := txnBaseBytes(6, nonce);
+   txnBytes, _ := txnBaseBytes(CLAIM_VM_ID_TYPE, nonce);
    vmIdBytes := decToBytes64(vmId, 8)
 
    txnBytes = append(txnBytes, vmIdBytes...)
@@ -34,8 +46,40 @@ func claimVMIdBytes(vmId int64, nonce int) ([]byte, error) {
    return txnBytes, nil
 }
 
+func claimActiveNodeSpotBytes(nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(CLAIM_ACTIVE_NODE_SPOT_TYPE, nonce);
+   return txnBytes, nil
+}
+
+func joinBytes(ip string, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(JOIN_TYPE, nonce);
+   
+   ipBytes := []byte(ip)
+   txnBytes = append(txnBytes, ipBytes...)
+   return txnBytes, nil
+}
+
+
+func validatorRemoveBytes(validatorAddress string, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(VALIDATOR_REMOVE_TYPE, nonce);
+   
+   validatorBytes, _ := hex.DecodeString(validatorAddress[2:])
+   paddedValidator := make([]byte, 20)
+   copy(paddedValidator[20-len(validatorBytes):], validatorBytes)
+
+   txnBytes = append(txnBytes, paddedValidator...)
+   return txnBytes, nil
+}
+
+func guardianWrappedTxBytes(txn []byte, nonce int) ([]byte, error) {
+   txnBytes, _ := txnBaseBytes(SEND_GUARDIAN_WRAPPED_TX_TYPE, nonce);
+   
+   txnBytes = append(txnBytes, txn...)
+   return txnBytes, nil
+}
+
 func delegateTxBytes(to string, amount *big.Int, nonce int) ([]byte, error) {
-   txnBytes, _ := txnBaseBytes(3, nonce);
+   txnBytes, _ := txnBaseBytes(DELEGATE_TYPE, nonce);
 
    amountBytes := amount.Bytes()
    paddedAmount := make([]byte, 8)
@@ -51,7 +95,7 @@ func delegateTxBytes(to string, amount *big.Int, nonce int) ([]byte, error) {
 }
 
 func withdrawTxBytes(from string, amount *big.Int, nonce int) ([]byte, error) {
-   txnBytes, _ := txnBaseBytes(4, nonce);
+   txnBytes, _ := txnBaseBytes(WITHDRAW_TYPE, nonce);
 
    amountBytes := amount.Bytes()
    paddedAmount := make([]byte, 8)
@@ -67,7 +111,7 @@ func withdrawTxBytes(from string, amount *big.Int, nonce int) ([]byte, error) {
 }
 
 func setGuardianTxBytes(guardian string, expiration *big.Int, nonce int) ([]byte, error) {
-   txnBytes, _ := txnBaseBytes(8, nonce);
+   txnBytes, _ := txnBaseBytes(SET_GUARDIAN_TYPE, nonce);
 
    expirationBytes := expiration.Bytes()
    paddedExpiration := make([]byte, 8)
@@ -83,7 +127,7 @@ func setGuardianTxBytes(guardian string, expiration *big.Int, nonce int) ([]byte
 }
 
 func sendConduitTxBytes(vmId int64, nonce int, txn []byte) ([]byte, error) {
-   txnBytes, _ := txnBaseBytes(11, nonce);
+   txnBytes, _ := txnBaseBytes(SEND_CONDUIT_TX_TYPE, nonce);
    vmIdBytes := decToBytes64(vmId, 8)
 
    txnBytes = append(txnBytes, vmIdBytes...)
@@ -93,7 +137,7 @@ func sendConduitTxBytes(vmId int64, nonce int, txn []byte) ([]byte, error) {
 }
 
 func transferTxBytes(nonce int, amount *big.Int, recipient string) ([]byte, error) { // TransferPWR()
-   txnBytes,_ := txnBaseBytes(0, nonce);
+   txnBytes,_ := txnBaseBytes(TRANSFER_TYPE, nonce);
 
    amountBytes := amount.Bytes()
    recipientBytes, err := hex.DecodeString(recipient[2:])
@@ -114,7 +158,7 @@ func transferTxBytes(nonce int, amount *big.Int, recipient string) ([]byte, erro
 }
 
 func vmDataBytes(vmId int64, nonce int, data []byte) ([]byte, error) {
-   txnBytes,_ := txnBaseBytes(5, nonce)
+   txnBytes,_ := txnBaseBytes(VM_DATA_TX_TYPE, nonce)
    vmIdBytes := decToBytes64(vmId, 8)
 
    txnBytes = append(txnBytes, vmIdBytes...)
