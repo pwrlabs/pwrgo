@@ -6,7 +6,7 @@ Golang library for PWR Chain RPC interactions
 To install the pwrgo library, run
 
 ```
-go get github.com/pwrlabs/pwrgo@v0.0.5
+go get github.com/pwrlabs/pwrgo@v0.0.6
 ```
 
 # Using the library
@@ -36,18 +36,24 @@ go run example.go
 - ValidatorsCount() int
 - GetBlock(blockNumber int) Block
 - SetRpcNodeUrl(url string)
-- Delegate(toAddress string, amount int, PrivateKey)
-- Withdraw(fromAddress string, amount int, PrivateKey)
-- SetGuardian(guardianAddress string, expirationEpoch string, PrivateKey)
-- RemoveGuardian(PrivateKey)
 
 ## Wallet operations
 - FromPrivateKey(privateKey string) PWRWallet
 - NewWallet() PWRWallet
 
 ## Transactions
-- TransferPWR(address string, amount string, nonce int, PrivateKey) Response
-- SendVMDataTx(vmId string, data []byte, nonce int, PrivateKey) Response
+- TransferPWR(address string, amount string, nonce int, PrivateKey) RPCResponse
+- SendVMDataTx(vmId string, data []byte, nonce int, PrivateKey) RPCResponse
+- Delegate(toAddress string, amount int, nonce int,PrivateKey) RPCResponse
+- Withdraw(fromAddress string, amount int, nonce int, PrivateKey) RPCResponse
+- SetGuardian(guardianAddress string, expirationEpoch string, nonce int, PrivateKey) RPCResponse
+- RemoveGuardian(nonce int, PrivateKey) RPCResponse
+- ValidatorRemove(validatorAddress string, PrivateKey) RPCResponse
+- GuardianWrappedTx(tx []byte, nonce int, PrivateKey) RPCResponse
+- ClaimActiveNodeSpot(nonce int, PrivateKey) RPCResponse
+- SendConduitTx(vmId int64, tx []byte, nonce int, PrivateKey) RPCResponse
+- Join(ipAddress string, nonce int, PrivateKey) RPCResponse
+- ClaimVMId(vmId int64, nonce int, PrivateKey) RPCResponse
 
 # example.go output
 
