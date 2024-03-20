@@ -80,7 +80,7 @@ func main() {
 
 
 	// Get Transfer TX Bytes
-	// var transferBytes = pwrgo.GetTransferTxBytes("0x61bd8fc1e30526aaf1c4706ada595d6d236d9883", "1", nonce)
+	//var transferBytes = pwrgo.GetTransferTxBytes("0x61bd8fc1e30526aaf1c4706ada595d6d236d9883", "1", nonce)
 	
 	// Send Conduit TX
 	// var conduitTxResponse = pwrgo.SendConduitTx(1337, transferBytes, nonce, wallet.PrivateKey)
@@ -126,5 +126,46 @@ func main() {
 	// 	fmt.Println("Error sending RemoveGuardian tx: ", removeGuardianTxResponse.Error)
 	// 	fmt.Println("Error sending ", removeGuardianTxResponse.TxHash)
 	// }
+
+	// Claim Active Node Spot
+	//var claimActiveNodeSpotTxResponse = pwrgo.ClaimActiveNodeSpot(nonce, wallet.PrivateKey)
+	//if claimActiveNodeSpotTxResponse.Success {
+	//   fmt.Printf("[Block #%d] Claimed Active Node Spot tx hash: %s", claimActiveNodeSpotTxResponse.BlockNumber, claimActiveNodeSpotTxResponse.TxHash)
+	//   nonce = nonce + 1
+	//} else {
+	//   fmt.Println("Error claiming active node spot tx: ", claimActiveNodeSpotTxResponse.Error)
+	//   fmt.Println("Error sending ", claimActiveNodeSpotTxResponse.TxHash)
+	//}
+
+	// Join as validator
+	//var joinTxResponse = pwrgo.Join("76.24.232.113", nonce, wallet.PrivateKey)
+	//if joinTxResponse.Success {
+	//   fmt.Printf("[Block #%d] Join tx hash: %s", joinTxResponse.BlockNumber, joinTxResponse.TxHash)
+	//   nonce = nonce + 1
+	//} else {
+	//   fmt.Println("Error in Join tx: ", joinTxResponse.Error)
+	//   fmt.Println("Error sending ", joinTxResponse.TxHash)
+	//}
+
+	// Send Guardian Wrapped transaction
+	//var guardianWrappedTxResponse = pwrgo.SendGuardianWrappedTx(transferBytes, nonce, wallet.PrivateKey)
+	//if guardianWrappedTxResponse.Success {
+	//   fmt.Printf("[Block #%d] SendGuardianWrapped tx hash: %s", guardianWrappedTxResponse.BlockNumber, guardianWrappedTxResponse.TxHash)
+	//   nonce = nonce + 1
+	//} else {
+	//   fmt.Println("Error in SendGuardianWrapped tx: ", guardianWrappedTxResponse.Error)
+	//   fmt.Println("Error sending ", guardianWrappedTxResponse.TxHash)
+	//}
+
+	
+	// Send ValidatorRemove transaction
+	//var validatorRemoveTxResponse = pwrgo.ValidatorRemove(wallet.Address, nonce, wallet.PrivateKey)
+	//if validatorRemoveTxResponse.Success {
+	//   fmt.Printf("[Block #%d] ValidatorRemove tx hash: %s", validatorRemoveTxResponse.BlockNumber, validatorRemoveTxResponse.TxHash)
+	//   nonce = nonce + 1
+	//} else {
+	//   fmt.Println("Error in ValidatorRemove tx: ", validatorRemoveTxResponse.Error)
+	//   fmt.Println("Error sending ", validatorRemoveTxResponse.TxHash)
+	//}
 
 }
