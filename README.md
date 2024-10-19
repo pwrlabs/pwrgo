@@ -32,3 +32,137 @@ How to [Guides](https://pwrlabs.io) 🔜 & [API](https://pwrlabs.io) 💻
 
 Play with [Code Examples](https://github.com/keep-pwr-strong/pwr-examples/) 🎮
 
+## 💫 Getting Started
+
+**Import the library:**
+
+```go
+import (
+    "fmt"
+    "github.com/pwrlabs/pwrgo/rpc"
+    "github.com/pwrlabs/pwrgo/wallet"
+)
+```
+
+**Set your RPC node:**
+
+```go
+rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io") // optional
+```
+
+**Import wallet by PK:**
+
+```go
+var privateKeyHex = "0xac0974bec...f80"
+var wallet = wallet.FromPrivateKey(privateKeyHex)
+```
+
+**Get wallet address:**
+
+```go
+var address = wallet.GetAddress()
+```
+
+**Get wallet balance:**
+
+```go
+var balance = wallet.GetBalance()
+```
+
+**Transfer PWR tokens:**
+
+```go
+var transferTx = wallet.TransferPWR("recipientAddress", 1000)
+```
+
+Sending a transcation to the PWR Chain returns a Response object, which specified if the transaction was a success, and returns relevant data.
+If the transaction was a success, you can retrieive the transaction hash, if it failed, you can fetch the error.
+
+```go
+package main
+import (
+    "fmt"
+    "github.com/pwrlabs/pwrgo/rpc"
+    "github.com/pwrlabs/pwrgo/wallet"
+)
+func main() {
+    var privateKeyHex = "0xac0974bec...f80"
+    var wallet = wallet.FromPrivateKey(privateKeyHex)
+
+    var transferTx = wallet.TransferPWR("recipientAddress", 1000)
+    if transferTx.Success {
+        fmt.Printf("Transfer tx hash: %s\n", transferTx.TxHash)
+    } else {
+        fmt.Println("Error sending Transfer tx:", transferTx.Error)
+    }
+}
+```
+
+**Send data to a VM:**
+
+```go
+package main
+import (
+    "fmt"
+    "github.com/pwrlabs/pwrgo/rpc"
+    "github.com/pwrlabs/pwrgo/wallet"
+)
+func main() {
+    var privateKeyHex = "0xac0974bec...f80"
+    var wallet = wallet.FromPrivateKey(privateKeyHex)
+
+    var data = []byte("Hello world")
+    var vmTxResponses = wallet.SendVMData(123, data)
+    if vmTxResponses.Success {
+        fmt.Printf("Sending tx hash: %s\n", vmTxResponses.TxHash)
+    } else {
+        fmt.Println("Error sending VM data tx:", vmTxResponses.Error)
+    }
+}
+```
+
+### Other Static Calls
+
+**Get RPC Node Url:**
+
+Returns currently set RPC node URL.
+
+```go
+var url = rpc.GetRpcNodeUrl()
+```
+
+**Get Fee Per Byte: **
+
+Gets the latest fee-per-byte rate.
+
+```go
+var fee = rpc.GetFeeBerByte()
+```
+
+**Get Balance Of Address:**
+
+Gets the balance of a specific address.
+
+```go
+var balance = rpc.GetBalanceOfAddress("0x...")
+```
+
+**Get Nonce Of Address:**
+
+Gets the nonce/transaction count of a specific address.
+
+```go
+var nonce = rpc.GetNonceOfAddress("0x...")
+```
+
+## ✏️ Contributing
+
+If you consider to contribute to this project please read [CONTRIBUTING.md](https://github.com/pwrlabs/pwrgo/blob/main/CONTRIBUTING.md) first.
+
+You can also join our dedicated channel for [pwr-rs](https://discord.com/channels/1141787507189624992/1180224756033790014) on the [PWR Chain Discord](https://discord.com/invite/YASmBk9EME)
+
+## 📜 License
+
+Copyright (c) 2024 PWR Labs
+
+Licensed under the [MIT license](https://github.com/pwrlabs/pwrgo/blob/main/LICENSE).
