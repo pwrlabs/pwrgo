@@ -59,7 +59,7 @@ type RPCResponse struct {
 	GuardianOfAddress          string                       `json:"guardian,omitempty"`
 	ShareValue                 float32                      `json:"shareValue,omitempty"`
 	Delegators                 map[string]int64             `json:"delegators,omitempty"`
-	AllEarlyWithdrawPenalties  map[string]string            `json:"allEarlyWithdrawPenalties,omitempty"`
+	AllEarlyWithdrawPenalties  map[string]string            `json:"earlyWithdrawPenalties,omitempty"`
 	Block                      Block                        `json:"block,omitempty"`
 	Validator                  Validator                    `json:"validator,omitempty"`
 	Validators                 []Validator                  `json:"validators,omitempty"`

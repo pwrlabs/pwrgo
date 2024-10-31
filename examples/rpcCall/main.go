@@ -24,7 +24,7 @@ func main() {
 	var guardian = rpc.GetGuardianOfAddress("0xD97C25C0842704588DD70A061C09A522699E2B9C")
     fmt.Println("Guardian:", guardian)
 
-	var block = rpc.GetBlockByNumber(836599)
+	var block = rpc.GetBlockByNumber(10)
     fmt.Println("Block:", block)
 
 	var activeVotingPower = rpc.GetActiveVotingPower()
@@ -36,6 +36,6 @@ func main() {
 	var totalValidatorsCount = rpc.GetValidatorsCount()
 	fmt.Println("TotalValidatorsCount:", totalValidatorsCount)
 	
-	var tx = rpc.GetTransactionByHash("0xe8be5c174a3457ba1015bef3399bb71a4081b8c24bdbebb05a8aea746ac32486")
+	var tx = rpc.GetTransactionByHash("0x9dcc1b814c5bb2484a4d10f166af3e528b99f0615a8e5de79c88eae0dd3fe654")
 	fmt.Println("Transfer TX: ", tx)
 }
