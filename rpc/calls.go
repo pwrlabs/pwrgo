@@ -289,7 +289,7 @@ func GetActiveValidatorsCount() int {
 	return resp.ValidatorsCount
 }
 
-func GetValidators() []Validator {
+func GetAllValidators() []Validator {
 	var response = get(GetRpcNodeUrl() + "/allValidators/")
 	var resp = parseRPCResponse(response)
 	return resp.Validators

@@ -1,5 +1,7 @@
 package rpc
 
+import "math/big"
+
 type Transaction struct {
 	ActionFee          int   	 `json:"actionFee"`
 	Fee				   int 	 	 `json:"fee"`
@@ -84,13 +86,13 @@ type VMDataTransaction struct {
 }
 
 type Validator struct {
-    Address         string    `json:"address"`
-    IP              string    `json:"ip"`
-    IsBadActor      bool  	  `json:"badActor"`
-    VotingPower     int 	  `json:"votingPower"`
-    Shares          int  	  `json:"totalShares"`
-    DelegatorsCount int  	  `json:"delegatorsCount"`
-    Status          string    `json:"status"`
+    Address         string    	  `json:"address"`
+    IP              string 		  `json:"ip"`
+    IsBadActor      bool          `json:"badActor"`
+    VotingPower     *big.Int 	  `json:"votingPower"`
+    Shares          *big.Int  	  `json:"totalShares"`
+    DelegatorsCount int  	  	  `json:"delegatorsCount"`
+    Status          string  	  `json:"status"`
 }
 
 type Penalty struct {
