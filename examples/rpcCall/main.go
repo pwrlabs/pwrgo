@@ -30,6 +30,9 @@ func main() {
 	var activeVotingPower = rpc.GetActiveVotingPower()
 	fmt.Println("ActiveVotingPower:", activeVotingPower)
 
+	var allValidators = rpc.GetAllValidators()
+	fmt.Println("AllValidators:", allValidators)
+
 	var conduitsVm = rpc.GetConduitsOfVmId(101001)
 	fmt.Println("ConduitsVm:", conduitsVm)
 
