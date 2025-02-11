@@ -48,8 +48,10 @@ func TransferTxBytes(amount int, recipient string, nonce int) ([]byte, error) { 
 func VmDataBytes(vmId int, data []byte, nonce int) ([]byte, error) {
 	txnBytes,_ := txnBaseBytes(vmDataType, nonce)
 	vmIdBytes := decToBytes64(int64(vmId), 8)
+	dataLengthBytes := decToBytes(int(len(data)), 4)
 
 	txnBytes = append(txnBytes, vmIdBytes...)
+	txnBytes = append(txnBytes, dataLengthBytes...)
 	txnBytes = append(txnBytes, data...)
 	
 	return txnBytes, nil
@@ -77,8 +79,10 @@ func PayableVmDataBytes(vmId int, data []byte, amount int, nonce int) ([]byte, e
 	txnBytes,_ := txnBaseBytes(payableVmDataType, nonce)
 	vmIdBytes := decToBytes64(int64(vmId), 8)
 	amountBytes := decToBytes64(int64(amount), 8)
+	dataLengthBytes := decToBytes(int(len(data)), 4)
 
 	txnBytes = append(txnBytes, vmIdBytes...)
+	txnBytes = append(txnBytes, dataLengthBytes...)
 	txnBytes = append(txnBytes, data...)
 	txnBytes = append(txnBytes, amountBytes...)
 	

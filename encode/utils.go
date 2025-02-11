@@ -1,7 +1,7 @@
 package encode
 
 func txnBaseBytes(txType int, nonce int) ([]byte, error){
-	typeByte := decToBytes(txType, 1)
+	typeByte := decToBytes(txType, 4)
 	chainByte := decToBytes(0, 1)
 	nonceBytes := decToBytes(nonce, 4)
 

@@ -15,9 +15,9 @@ func main() {
     var latestBlockCount = rpc.GetLatestBlockNumber()
     fmt.Println("Validators count:", latestBlockCount)
 
-	var startBlcok = 843500
-	var endBlock = 843750
-	var vmId = 123
+	var startBlcok = 65208
+	var endBlock = 65210
+	var vmId = 1234
 	var transactions = rpc.GetVmDataTransactions(startBlcok, endBlock, vmId)
 	fmt.Println("VM Data:", transactions)
 
@@ -36,6 +36,6 @@ func main() {
 	var totalValidatorsCount = rpc.GetValidatorsCount()
 	fmt.Println("TotalValidatorsCount:", totalValidatorsCount)
 	
-	var tx = rpc.GetTransactionByHash("0x9dcc1b814c5bb2484a4d10f166af3e528b99f0615a8e5de79c88eae0dd3fe654")
+	var tx = rpc.GetTransactionByHash("0x82c856bce3fb7ce2a504e8d108ed0ee59e5f8c5fc2c0002e94f9ef774da01911")
 	fmt.Println("Transfer TX: ", tx)
 }
