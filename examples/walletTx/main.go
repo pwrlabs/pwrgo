@@ -8,7 +8,8 @@ import (
 func main() {
     // Import wallet by private key
     var privateKeyHex = "0x04828e90065864c111871769c601d7de2246570b39dd37c19ccac16c14b18f72"
-    var wallet = wallet.FromPrivateKey(privateKeyHex)
+	wallet.FromPrivateKey(privateKeyHex).StoreWallet("wallet.dat", "1234")
+    var wallet, _ = wallet.LoadWallet("wallet.dat", "1234")
     
 	var address = wallet.GetAddress()
     fmt.Printf("Address: %s\n", address)
