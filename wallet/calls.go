@@ -1,7 +1,9 @@
 package wallet
 
 import (
+	"os"
 	"github.com/pwrlabs/pwrgo/rpc"
+	"github.com/pwrlabs/pwrgo/encode"
 )
 
 func (w *PWRWallet) GetAddress() string {
@@ -24,4 +26,14 @@ func (w *PWRWallet) GetNonce() int {
 func (w *PWRWallet) GetBalance() int {
 	nonce := rpc.GetBalanceOfAddress(w.address)
 	return nonce
+}
+
+func (w *PWRWallet) StoreWallet(path string, password string) error {
+	privateKeyBytes := w.privateKey.D.Bytes()
+	encryptedData, err := encode.Encrypt(privateKeyBytes, password)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(path, encryptedData, 0600)
 }

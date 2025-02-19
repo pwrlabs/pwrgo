@@ -2,6 +2,8 @@ package wallet
 
 import (
 	"net/http"
+	"os"
+	"encoding/hex"
     "io"
     "bytes"
 	"encoding/json"
@@ -10,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pwrlabs/pwrgo/rpc"
+	"github.com/pwrlabs/pwrgo/encode"
 )
 
 func SignMessage(message []byte, account *PWRWallet) ([]byte, error) {
@@ -71,6 +74,21 @@ func NewWallet() *PWRWallet {
 		log.Fatal(err.Error())
 	}
 	return privateKeyToWallet(privateKey)
+}
+
+func LoadWallet(path string, password string) (*PWRWallet, error) {
+	encryptedData, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	privateKeyBytes, err := encode.Decrypt(encryptedData, password)
+	if err != nil {
+		return nil, err
+	}
+
+	privateKey := hex.EncodeToString(privateKeyBytes)
+	return FromPrivateKey(privateKey), nil
 }
 
 func post(url string, jsonStr string) string {
