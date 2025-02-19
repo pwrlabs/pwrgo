@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"log"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -337,4 +338,31 @@ func GetFeeBerByte() int {
 	var response = get(GetRpcNodeUrl() + "/feePerByte/")
 	var resp = parseRPCResponse(response)
 	return resp.FeePerByte
+}
+
+func SubscribeToIvaTransactions(
+    vmID int,
+    startingBlock int,
+    handler IvaTransactionHandler,
+    pollInterval ...int,
+) *IvaTransactionSubscription {
+    interval := 100
+    if len(pollInterval) > 0 {
+        interval = pollInterval[0]
+    }
+
+    subscription := NewIvaTransactionSubscription(
+        vmID,
+        startingBlock,
+        handler,
+        interval,
+    )
+    
+    go func() {
+        if err := subscription.Start(); err != nil {
+            fmt.Printf("Subscription error: %v\n", err)
+        }
+    }()
+
+    return subscription
 }
