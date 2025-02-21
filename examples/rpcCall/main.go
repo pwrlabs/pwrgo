@@ -1,41 +1,42 @@
 package main
 
 import (
-    "fmt"
 	"encoding/hex"
-    "github.com/pwrlabs/pwrgo/rpc"
+	"fmt"
+
+	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 type MyHandler struct{}
 
-func (h *MyHandler) ProcessIvaTransactions(tx rpc.VMDataTransaction) {
-    dataHex := tx.Data
-    if len(dataHex) > 2 && dataHex[:2] == "0x" {
-        dataHex = dataHex[2:]
-    }
+func (h *MyHandler) ProcessVidaTransactions(tx rpc.VMDataTransaction) {
+	dataHex := tx.Data
+	if len(dataHex) > 2 && dataHex[:2] == "0x" {
+		dataHex = dataHex[2:]
+	}
 
-    dataBytes, err := hex.DecodeString(dataHex)
-    if err != nil {
-        fmt.Printf("Error processing transaction: %v\n", err)
-        return
-    }
+	dataBytes, err := hex.DecodeString(dataHex)
+	if err != nil {
+		fmt.Printf("Error processing transaction: %v\n", err)
+		return
+	}
 
-    // Convert the bytes into a UTF-8 string
-    dataString := string(dataBytes)
-    fmt.Printf("DATA: %s\n", dataString)
+	// Convert the bytes into a UTF-8 string
+	dataString := string(dataBytes)
+	fmt.Printf("DATA: %s\n", dataString)
 }
 
-func Ivas() {
+func Vidas() {
 	vmId := 1234
 	startingBlock := rpc.GetLatestBlockNumber()
 
 	handler := &MyHandler{}
 
-	rpc.SubscribeToIvaTransactions(
-        vmId,
-        startingBlock,
-        handler,
-    )
+	rpc.SubscribeToVidaTransactions(
+		vmId,
+		startingBlock,
+		handler,
+	)
 
 	select {}
 }
@@ -73,12 +74,12 @@ func RpcCall() {
 
 	var totalValidatorsCount = rpc.GetValidatorsCount()
 	fmt.Println("TotalValidatorsCount:", totalValidatorsCount)
-	
+
 	var tx = rpc.GetTransactionByHash("0x82c856bce3fb7ce2a504e8d108ed0ee59e5f8c5fc2c0002e94f9ef774da01911")
 	fmt.Println("Transfer TX: ", tx)
 }
 
 func main() {
 	// RpcCall()
-	Ivas()
+	Vidas()
 }

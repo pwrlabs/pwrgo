@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	"log"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -340,18 +340,18 @@ func GetFeeBerByte() int {
 	return resp.FeePerByte
 }
 
-func SubscribeToIvaTransactions(
+func SubscribeToVidaTransactions(
     vmID int,
     startingBlock int,
-    handler IvaTransactionHandler,
+    handler VidaTransactionHandler,
     pollInterval ...int,
-) *IvaTransactionSubscription {
+) *VidaTransactionSubscription {
     interval := 100
     if len(pollInterval) > 0 {
         interval = pollInterval[0]
     }
 
-    subscription := NewIvaTransactionSubscription(
+    subscription := NewVidaTransactionSubscription(
         vmID,
         startingBlock,
         handler,
