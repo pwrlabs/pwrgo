@@ -11,9 +11,9 @@ type VidaTransactionHandler interface {
 	ProcessVidaTransactions(transaction VMDataTransaction)
 }
 
-// VidaTransactionSubscription handles subscription to IVA transactions
+// VidaTransactionSubscription handles subscription to VIDA transactions
 type VidaTransactionSubscription struct {
-	vmID          int
+	vidaId          int
 	startingBlock int
 	handler       VidaTransactionHandler
 	pollInterval  int
@@ -24,13 +24,13 @@ type VidaTransactionSubscription struct {
 
 // NewVidaTransactionSubscription creates a new subscription instance
 func NewVidaTransactionSubscription(
-	vmID int,
+	vidaId int,
 	startingBlock int,
 	handler VidaTransactionHandler,
 	pollInterval int,
 ) *VidaTransactionSubscription {
 	return &VidaTransactionSubscription{
-		vmID:          vmID,
+		vidaId:          vidaId,
 		startingBlock: startingBlock,
 		handler:       handler,
 		pollInterval:  pollInterval,
@@ -62,7 +62,7 @@ func (s *VidaTransactionSubscription) Start() error {
 		}
 
 		if effectiveLatestBlock >= currentBlock {
-			transactions := GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vmID)
+			transactions := GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
 
 			for _, tx := range transactions {
 				s.handler.ProcessVidaTransactions(tx)
@@ -105,8 +105,8 @@ func (s *VidaTransactionSubscription) GetStartingBlock() int {
 	return s.startingBlock
 }
 
-func (s *VidaTransactionSubscription) GetVmID() int {
-	return s.vmID
+func (s *VidaTransactionSubscription) GetVidaId() int {
+	return s.vidaId
 }
 
 func (s *VidaTransactionSubscription) GetHandler() VidaTransactionHandler {
