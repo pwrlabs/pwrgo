@@ -10,10 +10,3 @@ type PWRWallet struct {
 	publicKey     string
 	address       string
 }
-
-type BroadcastResponse struct {
-    Message string   `json:"message,omitempty"`
-    Success bool
-    TxHash  string
-    Error   string
-}

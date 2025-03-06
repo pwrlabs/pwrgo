@@ -91,7 +91,7 @@ func main() {
 
     var transferTx = wallet.TransferPWR("recipientAddress", 1000)
     if transferTx.Success {
-        fmt.Printf("Transfer tx hash: %s\n", transferTx.TxHash)
+        fmt.Printf("Transfer tx hash: %s\n", transferTx.Hash)
     } else {
         fmt.Println("Error sending Transfer tx:", transferTx.Error)
     }
@@ -114,7 +114,7 @@ func main() {
     var data = []byte("Hello world")
     var vmTxResponses = wallet.SendVMData(123, data)
     if vmTxResponses.Success {
-        fmt.Printf("Sending tx hash: %s\n", vmTxResponses.TxHash)
+        fmt.Printf("Sending tx hash: %s\n", vmTxResponses.Hash)
     } else {
         fmt.Println("Error sending VM data tx:", vmTxResponses.Error)
     }

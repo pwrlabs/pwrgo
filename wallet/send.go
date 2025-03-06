@@ -3,9 +3,10 @@ package wallet
 import (
 	"log"
 	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/rpc"
 )
 
-func (w *PWRWallet) TransferPWR(to string, amount int) (BroadcastResponse) {
+func (w *PWRWallet) TransferPWR(to string, amount int) (rpc.BroadcastResponse) {
     if len(to) != 42 {
         log.Fatal("Invalid address: ", to)
     }
@@ -21,10 +22,15 @@ func (w *PWRWallet) TransferPWR(to string, amount int) (BroadcastResponse) {
         log.Fatal("Failed to get tx bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+    txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ClaimVMId(vmId int) (BroadcastResponse) {
+func (w *PWRWallet) ClaimVMId(vmId int) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -36,10 +42,15 @@ func (w *PWRWallet) ClaimVMId(vmId int) (BroadcastResponse) {
         log.Fatal("Failed to get claimVMIdBytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) Join(ipAddress string) (BroadcastResponse) {
+func (w *PWRWallet) Join(ipAddress string) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -51,11 +62,16 @@ func (w *PWRWallet) Join(ipAddress string) (BroadcastResponse) {
         log.Fatal("Failed to get joinBytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 
-func (w *PWRWallet) ValidatorRemove(validatorAddress string) (BroadcastResponse) {
+func (w *PWRWallet) ValidatorRemove(validatorAddress string) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -67,10 +83,15 @@ func (w *PWRWallet) ValidatorRemove(validatorAddress string) (BroadcastResponse)
         log.Fatal("Failed to get validatorRemoveBytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ClaimActiveNodeSpot() (BroadcastResponse) {
+func (w *PWRWallet) ClaimActiveNodeSpot() (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -82,10 +103,15 @@ func (w *PWRWallet) ClaimActiveNodeSpot() (BroadcastResponse) {
         log.Fatal("Failed to get claimActiveNodeSpotBytes: ", err.Error())
     }
 	
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) Delegate(validator string, amount int) (BroadcastResponse) {
+func (w *PWRWallet) Delegate(validator string, amount int) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -97,10 +123,15 @@ func (w *PWRWallet) Delegate(validator string, amount int) (BroadcastResponse) {
         log.Fatal("Failed to get DelegateTx bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) Withdraw(validator string, amount int) (BroadcastResponse) {
+func (w *PWRWallet) Withdraw(validator string, amount int) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -112,11 +143,16 @@ func (w *PWRWallet) Withdraw(validator string, amount int) (BroadcastResponse) {
         log.Fatal("Failed to get withdrawTx bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 
-func (w *PWRWallet) SetGuardian(guardian string, expiration int) (BroadcastResponse) {
+func (w *PWRWallet) SetGuardian(guardian string, expiration int) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -128,10 +164,15 @@ func (w *PWRWallet) SetGuardian(guardian string, expiration int) (BroadcastRespo
         log.Fatal("Failed to get setGuardian bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) RemoveGuardian() BroadcastResponse {
+func (w *PWRWallet) RemoveGuardian() rpc.BroadcastResponse {
     nonce := w.GetNonce()
 	if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -143,10 +184,15 @@ func (w *PWRWallet) RemoveGuardian() BroadcastResponse {
         log.Fatal("Failed to get txnBaseBytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) SetConduits(vmId int, conduits []string) (BroadcastResponse) {
+func (w *PWRWallet) SetConduits(vmId int, conduits []string) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -158,10 +204,15 @@ func (w *PWRWallet) SetConduits(vmId int, conduits []string) (BroadcastResponse)
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (BroadcastResponse) {
+func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -173,10 +224,15 @@ func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (Broadca
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (BroadcastResponse) {
+func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -188,10 +244,15 @@ func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (BroadcastRespons
         log.Fatal("Failed to get guardianWrappedTxBytes: ", err.Error())
     }
 
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) SendVMData(vmId int, data []byte) (BroadcastResponse) {
+func (w *PWRWallet) SendVMData(vmId int, data []byte) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -203,10 +264,15 @@ func (w *PWRWallet) SendVMData(vmId int, data []byte) (BroadcastResponse) {
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (BroadcastResponse) {
+func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -218,10 +284,15 @@ func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (Broadc
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator string) (BroadcastResponse) {
+func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator string) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -233,12 +304,17 @@ func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator st
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeEarlyWithdrawPenaltyProposal(
     withdraw_penalty int, withdraw_penalty_time int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -252,12 +328,17 @@ func (w *PWRWallet) ChangeEarlyWithdrawPenaltyProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeFeePerByteProposal(
     fee_per_byte int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -271,12 +352,17 @@ func (w *PWRWallet) ChangeFeePerByteProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeMaxBlockSizeProposal(
     max_block_size int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -290,12 +376,17 @@ func (w *PWRWallet) ChangeMaxBlockSizeProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeMaxTxnSizeProposal(
     max_txn_size int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -309,12 +400,17 @@ func (w *PWRWallet) ChangeMaxTxnSizeProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeOverallBurnPercentageProposal(
     burn_percentage int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -328,12 +424,17 @@ func (w *PWRWallet) ChangeOverallBurnPercentageProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeRewardPerYearProposal(
     burn_percentage int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -347,12 +448,17 @@ func (w *PWRWallet) ChangeRewardPerYearProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeValidatorCountLimitProposal(
     validator_count_limit int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -366,12 +472,17 @@ func (w *PWRWallet) ChangeValidatorCountLimitProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeValidatorJoiningFeeProposal(
     joining_fee int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -385,12 +496,17 @@ func (w *PWRWallet) ChangeValidatorJoiningFeeProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeVmIdClaimingFeeProposal(
     claiming_fee int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -404,12 +520,17 @@ func (w *PWRWallet) ChangeVmIdClaimingFeeProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeVmOwnerTxnFeeShareProposal(
     fee_share int, title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -423,12 +544,17 @@ func (w *PWRWallet) ChangeVmOwnerTxnFeeShareProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) OtherProposal(
     title string, description string,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -442,12 +568,17 @@ func (w *PWRWallet) OtherProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) VoteOnProposal(
     proposal_hash string, vote int,
-) (BroadcastResponse) {
+) (rpc.BroadcastResponse) {
     nonce := w.GetNonce()
     if nonce < 0 {
         log.Fatal("Nonce cannot be negative: ", nonce)
@@ -461,6 +592,11 @@ func (w *PWRWallet) VoteOnProposal(
         log.Fatal("Failed to get vm data bytes: ", err.Error())
     }
     
-	return SignAndBroadcast(buffer, w)
+	txn_bytes, err := SignTx(buffer, w)
+    if err != nil {
+        log.Fatal("Failed to sign message: ", err.Error())
+    }
+
+	return rpc.BroadcastTransaction(txn_bytes)
 }
 
