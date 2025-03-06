@@ -26,21 +26,21 @@ func main() {
 
     var transferTx = wallet.TransferPWR("0x3B3B69093879E7B6F28366FA3C32762590FF547E", amount)
 	if transferTx.Success {
-		fmt.Printf("Transfer tx hash: %s\n", transferTx.TxHash)
+		fmt.Printf("Transfer tx hash: %s\n", transferTx.Hash)
 	} else {
 		fmt.Println("Error sending Transfer tx:", transferTx.Error)
 	}
 
     var vmTx = wallet.SendVMData(vmId, data)
 	if vmTx.Success {
-		fmt.Printf("Sending tx hash: %s\n", vmTx.TxHash)
+		fmt.Printf("Sending tx hash: %s\n", vmTx.Hash)
 	} else {
 		fmt.Println("Error sending VM data tx:", vmTx.Error)
 	}
 	
     var vmTxResponses = wallet.SendPayableVMData(vmId, amount, data)
 	if vmTxResponses.Success {
-		fmt.Printf("Sending tx hash: %s\n", vmTxResponses.TxHash)
+		fmt.Printf("Sending tx hash: %s\n", vmTxResponses.Hash)
 	} else {
 		fmt.Println("Error sending VM data tx:", vmTxResponses.Error)
 	}
@@ -49,7 +49,7 @@ func main() {
 	// var vmIds = 101001
 	// var setConduit = wallet.SetConduits(vmIds, conduits)
 	// if setConduit.Success {
-	// 	fmt.Printf("Sending tx hash: %s\n", setConduit.TxHash)
+	// 	fmt.Printf("Sending tx hash: %s\n", setConduit.Hash)
 	// } else {
 	// 	fmt.Println("Error sending VM data tx:", setConduit.Error)
 	// }

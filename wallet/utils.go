@@ -1,17 +1,13 @@
 package wallet
 
 import (
-	"net/http"
 	"os"
 	"encoding/hex"
-    "io"
-    "bytes"
-	"encoding/json"
 	"crypto/ecdsa"
 	"log"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/pwrlabs/pwrgo/rpc"
 	"github.com/pwrlabs/pwrgo/encode"
 )
 
@@ -30,29 +26,13 @@ func SignMessage(message []byte, account *PWRWallet) ([]byte, error) {
 	return signature, nil
 }
 
-func SignAndBroadcast(buffer []byte, account *PWRWallet) (BroadcastResponse) {
+func SignTx(buffer []byte, account *PWRWallet) ([]byte, error) {
 	signature, err := SignMessage(buffer, account)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-    finalTxn := append(buffer, signature...)
-    var transferTx = hexutil.Encode(finalTxn)
-    var transferTxn = `{"txn":"` + transferTx[2:] + `"}`
-    result := post(rpc.GetRpcNodeUrl() + "/broadcast/", transferTxn)
-
-	hash := crypto.Keccak256Hash(finalTxn)
-	txResponse := parseBroadcastResponse(result)
-	
-	if txResponse.Message == "Txn broadcast to validator nodes" {
-		txResponse.Success = true
-	} else {
-		txResponse.Success = false
-		txResponse.Error = txResponse.Message
+	if err != nil {
+		return nil, err
 	}
-
-	txResponse.TxHash = hash.Hex()
-    return txResponse
+	txn_bytes := append(buffer, signature...)
+	return txn_bytes, nil
 }
 
 func FromPrivateKey(privateKeyStr string) *PWRWallet {
@@ -91,24 +71,6 @@ func LoadWallet(path string, password string) (*PWRWallet, error) {
 	return FromPrivateKey(privateKey), nil
 }
 
-func post(url string, jsonStr string) string {
-    var jsonBytes = []byte(jsonStr)
-    req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
-
-    req.Header.Set("Content-Type", "application/json")
-
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
-
-    body, _ := io.ReadAll(resp.Body)
-    return string(body)
-}
-
-
 func privateKeyToWallet (privateKey *ecdsa.PrivateKey) *PWRWallet {
 	publicKey := &privateKey.PublicKey
 	publicKeyStr := hexutil.Encode(crypto.FromECDSAPub(publicKey))
@@ -121,12 +83,4 @@ func privateKeyToWallet (privateKey *ecdsa.PrivateKey) *PWRWallet {
 	wallet.address = address.Hex()
 	wallet.privateKeyStr = privateKeyStr
 	return wallet
-}
-
-func parseBroadcastResponse(responseStr string) (response BroadcastResponse) {
-    err := json.Unmarshal([]byte(responseStr), &response)
-    if err != nil {
-        log.Fatalf("Error unmarshaling: %s", err)
-    }
-    return
 }

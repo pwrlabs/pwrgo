@@ -81,6 +81,6 @@ func RpcCall() {
 }
 
 func main() {
-    // RpcCall()
-    Vidas()
+    RpcCall()
+    // Vidas()
 }
