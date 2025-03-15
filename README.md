@@ -28,7 +28,7 @@ It provides an easy interface for wallet management and sending transactions on 
 
 ## 🌐 Documentation
 
-How to [Guides](https://pwrlabs.io) 🔜 & [API](https://pwrlabs.io) 💻
+How to [Guides](https://docs.pwrlabs.io/pwrchain/overview) 🔜 & [API](https://docs.pwrlabs.io/developers/developing-on-pwr-chain/what-is-a-decentralized-application) 💻
 
 Play with [Code Examples](https://github.com/keep-pwr-strong/pwr-examples/) 🎮
 
@@ -131,7 +131,7 @@ Returns currently set RPC node URL.
 var url = rpc.GetRpcNodeUrl()
 ```
 
-**Get Fee Per Byte: **
+**Get Fee Per Byte:**
 
 Gets the latest fee-per-byte rate.
 
@@ -159,10 +159,10 @@ var nonce = rpc.GetNonceOfAddress("0x...")
 
 If you consider to contribute to this project please read [CONTRIBUTING.md](https://github.com/pwrlabs/pwrgo/blob/main/CONTRIBUTING.md) first.
 
-You can also join our dedicated channel for [pwr-rs](https://discord.com/channels/1141787507189624992/1180224756033790014) on the [PWR Chain Discord](https://discord.com/invite/YASmBk9EME)
+You can also join our dedicated channel for [developers](https://discord.com/channels/1141787507189624992/1180224756033790014) on the [PWR Chain Discord](https://discord.com/invite/YASmBk9EME)
 
 ## 📜 License
 
-Copyright (c) 2024 PWR Labs
+Copyright (c) 2025 PWR Labs
 
 Licensed under the [MIT license](https://github.com/pwrlabs/pwrgo/blob/main/LICENSE).
