@@ -343,7 +343,7 @@ func GetFeeBerByte() int {
 func SubscribeToVidaTransactions(
     vmID int,
     startingBlock int,
-    handler VidaTransactionHandler,
+    handler ProcessVidaTransactions,
     pollInterval ...int,
 ) *VidaTransactionSubscription {
     interval := 100
@@ -358,11 +358,9 @@ func SubscribeToVidaTransactions(
         interval,
     )
     
-    go func() {
-        if err := subscription.Start(); err != nil {
-            fmt.Printf("Subscription error: %v\n", err)
-        }
-    }()
+	if err := subscription.Start(); err != nil {
+		fmt.Printf("Subscription error: %v\n", err)
+	}
 
     return subscription
 }

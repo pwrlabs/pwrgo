@@ -8,11 +8,10 @@ import (
     "github.com/pwrlabs/pwrgo/rpc"
 )
 
-type MyHandler struct{}
-
-func (h *MyHandler) ProcessVidaTransactions(tx rpc.VMDataTransaction) {
-    sender := tx.Sender
-    data := tx.Data
+// Handler for incoming messages
+func messageHandler(transaction rpc.VMDataTransaction) {
+    sender := transaction.Sender
+    data := transaction.Data
     
     dataBytes, _ := hex.DecodeString(data[2:])
     var obj map[string]interface{}
@@ -28,15 +27,13 @@ func (h *MyHandler) ProcessVidaTransactions(tx rpc.VMDataTransaction) {
 }
 
 func Vidas() {
-    vmId := 1234
+    vmId := 1
     startingBlock := rpc.GetLatestBlockNumber()
-
-    handler := &MyHandler{}
 
     rpc.SubscribeToVidaTransactions(
         vmId,
         startingBlock,
-        handler,
+        messageHandler,
     )
 
     select {}
