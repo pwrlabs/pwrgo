@@ -6,27 +6,26 @@ import (
 	"time"
 )
 
-// VidaTransactionHandler is a function type for processing transactions
-type VidaTransactionHandler interface {
-	ProcessVidaTransactions(transaction VMDataTransaction)
-}
+// ProcessVidaTransactions is a function type for transaction handlers
+type ProcessVidaTransactions func(transaction VMDataTransaction)
 
 // VidaTransactionSubscription handles subscription to VIDA transactions
 type VidaTransactionSubscription struct {
-	vidaId          int
-	startingBlock int
-	handler       VidaTransactionHandler
-	pollInterval  int
-	isRunning     atomic.Bool
-	isPaused      atomic.Bool
-	isStopped     atomic.Bool
+	vidaId         	   int
+	startingBlock 	   int
+	latestCheckedBlock int
+	handler        	   ProcessVidaTransactions
+	pollInterval	   int
+	isRunning 		   atomic.Bool
+	isPaused    	   atomic.Bool
+	isStopped   	   atomic.Bool
 }
 
 // NewVidaTransactionSubscription creates a new subscription instance
 func NewVidaTransactionSubscription(
 	vidaId int,
 	startingBlock int,
-	handler VidaTransactionHandler,
+	handler ProcessVidaTransactions,
 	pollInterval int,
 ) *VidaTransactionSubscription {
 	return &VidaTransactionSubscription{
@@ -65,9 +64,10 @@ func (s *VidaTransactionSubscription) Start() error {
 			transactions := GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
 
 			for _, tx := range transactions {
-				s.handler.ProcessVidaTransactions(tx)
+				s.handler(tx)
 			}
 			currentBlock = effectiveLatestBlock + 1
+			s.latestCheckedBlock = currentBlock
 		}
 
 		time.Sleep(time.Millisecond * 100)
@@ -105,10 +105,14 @@ func (s *VidaTransactionSubscription) GetStartingBlock() int {
 	return s.startingBlock
 }
 
+func (s *VidaTransactionSubscription) GetLatestCheckedBlock() int {
+	return s.latestCheckedBlock
+}
+
 func (s *VidaTransactionSubscription) GetVidaId() int {
 	return s.vidaId
 }
 
-func (s *VidaTransactionSubscription) GetHandler() VidaTransactionHandler {
+func (s *VidaTransactionSubscription) GetHandler() ProcessVidaTransactions {
 	return s.handler
 }
