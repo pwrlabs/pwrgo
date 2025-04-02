@@ -27,16 +27,22 @@ func messageHandler(transaction rpc.VMDataTransaction) {
 }
 
 func Vidas() {
-    vmId := 1
+    vidaId := 1
     startingBlock := rpc.GetLatestBlockNumber()
 
-    rpc.SubscribeToVidaTransactions(
-        vmId,
+    subscription := rpc.SubscribeToVidaTransactions(
+        vidaId,
         startingBlock,
         messageHandler,
     )
 
-    select {}
+    subscription.Pause()
+    subscription.Resume()
+    subscription.Stop()
+
+    if (subscription.IsRunning()) {
+        fmt.Scanln()
+    }
 }
 
 func RpcCall() {
