@@ -2,6 +2,8 @@ package rpc
 
 import "math/big"
 
+type ProcessVidaTransactions func(transaction VMDataTransaction)
+
 type Transaction struct {
 	ActionFee          int    `json:"actionFee"`
 	Fee                int    `json:"fee"`
