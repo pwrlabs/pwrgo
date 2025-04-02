@@ -133,7 +133,7 @@ func (s *VidaTransactionSubscription) GetHandler() ProcessVidaTransactions {
 
 // SubscribeToVidaTransactions creates and starts a subscription
 func SubscribeToVidaTransactions(
-    vmID int,
+    vidaId int,
     startingBlock int,
     handler ProcessVidaTransactions,
     pollInterval ...int,
@@ -144,7 +144,7 @@ func SubscribeToVidaTransactions(
     }
 
     subscription := NewVidaTransactionSubscription(
-        vmID,
+        vidaId,
         startingBlock,
         handler,
         interval,
