@@ -38,9 +38,12 @@ func Vidas() {
 
     subscription.Pause()
     subscription.Resume()
-    subscription.Stop()
+    // subscription.Stop()
+
+    fmt.Println("Latest checked blocked:", subscription.GetLatestCheckedBlock())
 
     if (subscription.IsRunning()) {
+        fmt.Println("Press Enter to exit...")
         fmt.Scanln()
     }
 }
