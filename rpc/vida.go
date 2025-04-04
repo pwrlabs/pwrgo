@@ -100,7 +100,6 @@ func (s *VidaTransactionSubscription) Resume() {
 
 func (s *VidaTransactionSubscription) Stop() {
     s.stopped.Store(true)
-    s.running.Store(false)
 }
 
 func (s *VidaTransactionSubscription) IsRunning() bool {
