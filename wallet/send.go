@@ -27,7 +27,7 @@ func (w *PWRWallet) TransferPWR(to string, amount int) (rpc.BroadcastResponse) {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ClaimVMId(vmId int) (rpc.BroadcastResponse) {
@@ -47,7 +47,7 @@ func (w *PWRWallet) ClaimVMId(vmId int) (rpc.BroadcastResponse) {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) Join(ipAddress string) (rpc.BroadcastResponse) {
@@ -67,7 +67,7 @@ func (w *PWRWallet) Join(ipAddress string) (rpc.BroadcastResponse) {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 
@@ -88,7 +88,7 @@ func (w *PWRWallet) ValidatorRemove(validatorAddress string) (rpc.BroadcastRespo
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ClaimActiveNodeSpot() (rpc.BroadcastResponse) {
@@ -108,7 +108,7 @@ func (w *PWRWallet) ClaimActiveNodeSpot() (rpc.BroadcastResponse) {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) Delegate(validator string, amount int) (rpc.BroadcastResponse) {
@@ -128,7 +128,7 @@ func (w *PWRWallet) Delegate(validator string, amount int) (rpc.BroadcastRespons
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) Withdraw(validator string, amount int) (rpc.BroadcastResponse) {
@@ -148,7 +148,7 @@ func (w *PWRWallet) Withdraw(validator string, amount int) (rpc.BroadcastRespons
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 
@@ -169,7 +169,7 @@ func (w *PWRWallet) SetGuardian(guardian string, expiration int) (rpc.BroadcastR
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) RemoveGuardian() rpc.BroadcastResponse {
@@ -189,7 +189,7 @@ func (w *PWRWallet) RemoveGuardian() rpc.BroadcastResponse {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) SetConduits(vmId int, conduits []string) (rpc.BroadcastResponse) {
@@ -209,7 +209,7 @@ func (w *PWRWallet) SetConduits(vmId int, conduits []string) (rpc.BroadcastRespo
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (rpc.BroadcastResponse) {
@@ -229,7 +229,7 @@ func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (rpc.Bro
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (rpc.BroadcastResponse) {
@@ -249,7 +249,7 @@ func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (rpc.BroadcastRes
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) SendVMData(vmId int, data []byte) (rpc.BroadcastResponse) {
@@ -269,7 +269,7 @@ func (w *PWRWallet) SendVMData(vmId int, data []byte) (rpc.BroadcastResponse) {
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (rpc.BroadcastResponse) {
@@ -289,7 +289,7 @@ func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (rpc.Br
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator string) (rpc.BroadcastResponse) {
@@ -309,7 +309,7 @@ func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator st
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeEarlyWithdrawPenaltyProposal(
@@ -333,7 +333,7 @@ func (w *PWRWallet) ChangeEarlyWithdrawPenaltyProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeFeePerByteProposal(
@@ -357,7 +357,7 @@ func (w *PWRWallet) ChangeFeePerByteProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeMaxBlockSizeProposal(
@@ -381,7 +381,7 @@ func (w *PWRWallet) ChangeMaxBlockSizeProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeMaxTxnSizeProposal(
@@ -405,7 +405,7 @@ func (w *PWRWallet) ChangeMaxTxnSizeProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeOverallBurnPercentageProposal(
@@ -429,7 +429,7 @@ func (w *PWRWallet) ChangeOverallBurnPercentageProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeRewardPerYearProposal(
@@ -453,7 +453,7 @@ func (w *PWRWallet) ChangeRewardPerYearProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeValidatorCountLimitProposal(
@@ -477,7 +477,7 @@ func (w *PWRWallet) ChangeValidatorCountLimitProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeValidatorJoiningFeeProposal(
@@ -501,7 +501,7 @@ func (w *PWRWallet) ChangeValidatorJoiningFeeProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeVmIdClaimingFeeProposal(
@@ -525,7 +525,7 @@ func (w *PWRWallet) ChangeVmIdClaimingFeeProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) ChangeVmOwnerTxnFeeShareProposal(
@@ -549,7 +549,7 @@ func (w *PWRWallet) ChangeVmOwnerTxnFeeShareProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) OtherProposal(
@@ -573,7 +573,7 @@ func (w *PWRWallet) OtherProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) VoteOnProposal(
@@ -597,6 +597,6 @@ func (w *PWRWallet) VoteOnProposal(
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 

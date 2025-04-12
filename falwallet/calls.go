@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 
 	"github.com/pwrlabs/pwrgo/encode"
-	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 func (w *Falcon512Wallet) GetAddress() string {
@@ -23,12 +22,12 @@ func (w *Falcon512Wallet) GetPrivateKey() []byte {
 }
 
 func (w *Falcon512Wallet) GetBalance() int {
-	balance := rpc.GetBalanceOfAddress(w.GetAddress())
+	balance := w.rpc.GetBalanceOfAddress(w.GetAddress())
 	return balance
 }
 
 func (w *Falcon512Wallet) GetNonce() int {
-	nonce := rpc.GetNonceOfAddress(w.GetAddress())
+	nonce := w.rpc.GetNonceOfAddress(w.GetAddress())
 	return nonce
 }
 

@@ -47,7 +47,7 @@ import (
 **Set your RPC node:**
 
 ```go
-rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io") // optional
+var pwr = rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io")
 ```
 
 **Import wallet by PK:**
@@ -128,7 +128,7 @@ func main() {
 Returns currently set RPC node URL.
 
 ```go
-var url = rpc.GetRpcNodeUrl()
+var url = pwr.GetRpcNodeUrl()
 ```
 
 **Get Fee Per Byte:**
@@ -136,7 +136,7 @@ var url = rpc.GetRpcNodeUrl()
 Gets the latest fee-per-byte rate.
 
 ```go
-var fee = rpc.GetFeeBerByte()
+var fee = pwr.GetFeeBerByte()
 ```
 
 **Get Balance Of Address:**
@@ -144,7 +144,7 @@ var fee = rpc.GetFeeBerByte()
 Gets the balance of a specific address.
 
 ```go
-var balance = rpc.GetBalanceOfAddress("0x...")
+var balance = pwr.GetBalanceOfAddress("0x...")
 ```
 
 **Get Nonce Of Address:**
@@ -152,7 +152,7 @@ var balance = rpc.GetBalanceOfAddress("0x...")
 Gets the nonce/transaction count of a specific address.
 
 ```go
-var nonce = rpc.GetNonceOfAddress("0x...")
+var nonce = pwr.GetNonceOfAddress("0x...")
 ```
 
 ## ✏️ Contributing

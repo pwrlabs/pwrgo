@@ -2,6 +2,8 @@ package wallet
 
 import (
 	"crypto/ecdsa"
+
+	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 type PWRWallet struct {
@@ -9,4 +11,5 @@ type PWRWallet struct {
 	privateKeyStr string
 	publicKey     string
 	address       string
+	rpc           *rpc.RPC
 }

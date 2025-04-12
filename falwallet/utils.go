@@ -7,42 +7,45 @@ import (
 	"os"
 
 	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/rpc"
 	"github.com/ebfe/keccak"
 )
 
 // New creates a new Falcon512Wallet with generated keys
-func New() (*Falcon512Wallet, error) {
+func New(rpcEndpoint ...string) (*Falcon512Wallet, error) {
 	keyPair, err := encode.GenerateKeyPair(9) // 9 for Falcon-512
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the hash of the public key
-	hash := hash224(keyPair.PublicKey)
-	address := hash[:20]
+	wallet, _ := FromKeys(
+		keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
+	)
 
-	return &Falcon512Wallet{
-		PublicKey:  keyPair.PublicKey,
-		PrivateKey: keyPair.PrivateKey,
-		Address:    address,
-	}, nil
+	return wallet, nil
 }
 
 // FromKeys creates a wallet from existing keys
-func FromKeys(publicKey, privateKey []byte) (*Falcon512Wallet, error) {
+func FromKeys(publicKey, privateKey []byte, rpcEndpoint ...string) (*Falcon512Wallet, error) {
 	// Get the hash of the public key
 	hash := hash224(publicKey)
 	address := hash[:20]
+
+	endpoint := "https://pwrrpc.pwrlabs.io"
+	if len(rpcEndpoint) > 0 {
+		endpoint = rpcEndpoint[0]
+	}
 
 	return &Falcon512Wallet{
 		PublicKey:  publicKey,
 		PrivateKey: privateKey,
 		Address:    address,
+		rpc:        rpc.SetRpcNodeUrl(endpoint),
 	}, nil
 }
 
 // LoadWallet loads a wallet from a file
-func LoadWallet(filePath string) (*Falcon512Wallet, error) {
+func LoadWallet(filePath string, rpcEndpoint ...string) (*Falcon512Wallet, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func LoadWallet(filePath string) (*Falcon512Wallet, error) {
 
 	privateKeyBytes := data[8+pubLength : 8+pubLength+secLength]
 
-	return FromKeys(publicKeyBytes, privateKeyBytes)
+	return FromKeys(publicKeyBytes, privateKeyBytes, rpcEndpoint...)
 }
 
 func hash224(input []byte) []byte {

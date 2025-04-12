@@ -8,6 +8,8 @@ import (
     "github.com/pwrlabs/pwrgo/rpc"
 )
 
+var pwr = rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io")
+
 // Handler for incoming messages
 func messageHandler(transaction rpc.VMDataTransaction) {
     sender := transaction.Sender
@@ -28,9 +30,9 @@ func messageHandler(transaction rpc.VMDataTransaction) {
 
 func Vidas() {
     vidaId := 1
-    startingBlock := rpc.GetLatestBlockNumber()
+    startingBlock := pwr.GetLatestBlockNumber()
 
-    subscription := rpc.SubscribeToVidaTransactions(
+    subscription := pwr.SubscribeToVidaTransactions(
         vidaId,
         startingBlock,
         messageHandler,
@@ -49,40 +51,40 @@ func Vidas() {
 }
 
 func RpcCall() {
-    var delegators = rpc.GetDelegatorsOfValidator("0x7b6F32435084Cab827f0ce7Af1C0D48600CE3CaD")
+    var delegators = pwr.GetDelegatorsOfValidator("0x7b6F32435084Cab827f0ce7Af1C0D48600CE3CaD")
     fmt.Println("Delegators:", delegators)
     
-    var blocksCount = rpc.GetBlocksCount()
+    var blocksCount = pwr.GetBlocksCount()
     fmt.Println("Blocks count:", blocksCount)
 
-    var latestBlockCount = rpc.GetLatestBlockNumber()
+    var latestBlockCount = pwr.GetLatestBlockNumber()
     fmt.Println("Validators count:", latestBlockCount)
 
     var startBlcok = 65208
     var endBlock = 65210
     var vmId = 1234
-    var transactions = rpc.GetVmDataTransactions(startBlcok, endBlock, vmId)
+    var transactions = pwr.GetVmDataTransactions(startBlcok, endBlock, vmId)
     fmt.Println("VM Data:", transactions)
 
-    var guardian = rpc.GetGuardianOfAddress("0xD97C25C0842704588DD70A061C09A522699E2B9C")
+    var guardian = pwr.GetGuardianOfAddress("0xD97C25C0842704588DD70A061C09A522699E2B9C")
     fmt.Println("Guardian:", guardian)
 
-    var block = rpc.GetBlockByNumber(10)
+    var block = pwr.GetBlockByNumber(10)
     fmt.Println("Block:", block)
 
-    var activeVotingPower = rpc.GetActiveVotingPower()
+    var activeVotingPower = pwr.GetActiveVotingPower()
     fmt.Println("ActiveVotingPower:", activeVotingPower)
 
-    var allValidators = rpc.GetAllValidators()
+    var allValidators = pwr.GetAllValidators()
     fmt.Println("AllValidators:", allValidators)
 
-    var conduitsVm = rpc.GetConduitsOfVmId(101001)
+    var conduitsVm = pwr.GetConduitsOfVmId(101001)
     fmt.Println("ConduitsVm:", conduitsVm)
 
-    var totalValidatorsCount = rpc.GetValidatorsCount()
+    var totalValidatorsCount = pwr.GetValidatorsCount()
     fmt.Println("TotalValidatorsCount:", totalValidatorsCount)
 
-    var tx = rpc.GetTransactionByHash("0x82c856bce3fb7ce2a504e8d108ed0ee59e5f8c5fc2c0002e94f9ef774da01911")
+    var tx = pwr.GetTransactionByHash("0x22302a23e2a190a4cd03793718d296414d5f03ec383f556246815f9143062adf")
     fmt.Println("Transfer TX: ", tx)
 }
 

@@ -6,39 +6,39 @@ import (
 	"strings"
 )
 
-func GetNonceOfAddress(address string) int {
-	var response = get(GetRpcNodeUrl() + "/nonceOfUser/?userAddress=" + address)
+func (r *RPC) GetNonceOfAddress(address string) int {
+	var response = get(r.GetRpcNodeUrl() + "/nonceOfUser/?userAddress=" + address)
 	var resp = parseRPCResponse(response)
 	return resp.Nonce
 }
 
-func GetBalanceOfAddress(address string) int {
-	var response = get(GetRpcNodeUrl() + "/balanceOf/?userAddress=" + address)
+func (r *RPC) GetBalanceOfAddress(address string) int {
+	var response = get(r.GetRpcNodeUrl() + "/balanceOf/?userAddress=" + address)
 	var resp = parseRPCResponse(response)
 	return resp.Balance
 }
 
-func GetBlocksCount() int {
-	var response = get(GetRpcNodeUrl() + "/blocksCount/")
+func (r *RPC) GetBlocksCount() int {
+	var response = get(r.GetRpcNodeUrl() + "/blocksCount/")
 	var resp = parseRPCResponse(response)
 	return resp.BlocksCount
 }
 
-func GetValidatorsCount() int {
-	var response = get(GetRpcNodeUrl() + "/totalValidatorsCount/")
+func (r *RPC) GetValidatorsCount() int {
+	var response = get(r.GetRpcNodeUrl() + "/totalValidatorsCount/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorsCount
 }
 
-func GetBlockByNumber(blockNumber int) Block {
+func (r *RPC) GetBlockByNumber(blockNumber int) Block {
 	var blockNumberStr = strconv.Itoa(blockNumber)
-	var response = get(GetRpcNodeUrl() + "/block/?blockNumber=" + blockNumberStr)
+	var response = get(r.GetRpcNodeUrl() + "/block/?blockNumber=" + blockNumberStr)
 	var resp = parseRPCResponse(response)
 	return resp.Block
 }
 
-func GetBlockchainVersion() int64 {
-	var response = get(GetRpcNodeUrl() + "/blockchainVersion/")
+func (r *RPC) GetBlockchainVersion() int64 {
+	var response = get(r.GetRpcNodeUrl() + "/blockchainVersion/")
 	num, _ := strconv.ParseInt(response, 10, 64)
 	return num
 }
@@ -47,38 +47,38 @@ func GetBlockchainVersion() int64 {
 
 // }
 
-func GetEcdsaVerificationFee() int {
-	var response = get(GetRpcNodeUrl() + "/ecdsaVerificationFee/")
+func (r *RPC) GetEcdsaVerificationFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/ecdsaVerificationFee/")
 	var resp = parseRPCResponse(response)
 	return resp.ECDSAVerificationFee
 }
 
-func GetBurnPercentage() int {
-	var response = get(GetRpcNodeUrl() + "/burnPercentage/")
+func (r *RPC) GetBurnPercentage() int {
+	var response = get(r.GetRpcNodeUrl() + "/burnPercentage/")
 	var resp = parseRPCResponse(response)
 	return resp.BurnPercentage
 }
 
-func GetTotalVotingPower() int {
-	var response = get(GetRpcNodeUrl() + "/totalVotingPower/")
+func (r *RPC) GetTotalVotingPower() int {
+	var response = get(r.GetRpcNodeUrl() + "/totalVotingPower/")
 	var resp = parseRPCResponse(response)
 	return resp.TotalVotingPower
 }
 
-func GetPwrRewardsPerYear() int {
-	var response = get(GetRpcNodeUrl() + "/pwrRewardsPerYear/")
+func (r *RPC) GetPwrRewardsPerYear() int {
+	var response = get(r.GetRpcNodeUrl() + "/pwrRewardsPerYear/")
 	var resp = parseRPCResponse(response)
 	return resp.PwrRewardsPerYear
 }
 
-func GetWithdrawalLockTime() int {
-	var response = get(GetRpcNodeUrl() + "/withdrawalLockTime/")
+func (r *RPC) GetWithdrawalLockTime() int {
+	var response = get(r.GetRpcNodeUrl() + "/withdrawalLockTime/")
 	var resp = parseRPCResponse(response)
 	return resp.WithdrawalLockTime
 }
 
-func GetAllEarlyWithdrawPenalties() []Penalty {
-	var response = get(GetRpcNodeUrl() + "/allEarlyWithdrawPenalties/")
+func (r *RPC) GetAllEarlyWithdrawPenalties() []Penalty {
+	var response = get(r.GetRpcNodeUrl() + "/allEarlyWithdrawPenalties/")
 	var resp = parseRPCResponse(response)
 
 	var penalties []Penalty
@@ -94,139 +94,139 @@ func GetAllEarlyWithdrawPenalties() []Penalty {
 	return penalties
 }
 
-func GetMaxBlockSize() int {
-	var response = get(GetRpcNodeUrl() + "/maxBlockSize/")
+func (r *RPC) GetMaxBlockSize() int {
+	var response = get(r.GetRpcNodeUrl() + "/maxBlockSize/")
 	var resp = parseRPCResponse(response)
 	return resp.MaxBlockSize
 }
 
-func GetMaxTransactionSize() int {
-	var response = get(GetRpcNodeUrl() + "/maxTransactionSize/")
+func (r *RPC) GetMaxTransactionSize() int {
+	var response = get(r.GetRpcNodeUrl() + "/maxTransactionSize/")
 	var resp = parseRPCResponse(response)
 	return resp.MaxTransactionSize
 }
 
-func getBlockNumber() int {
-	var response = get(GetRpcNodeUrl() + "/blockNumber/")
+func (r *RPC) getBlockNumber() int {
+	var response = get(r.GetRpcNodeUrl() + "/blockNumber/")
 	var resp = parseRPCResponse(response)
 	return resp.BlockNumber
 }
 
-func GetBlockTimestamp() int {
-	var response = get(GetRpcNodeUrl() + "/blockTimestamp/")
+func (r *RPC) GetBlockTimestamp() int {
+	var response = get(r.GetRpcNodeUrl() + "/blockTimestamp/")
 	var resp = parseRPCResponse(response)
 	return resp.BlockTimestamp
 }
 
-func GetLatestBlockNumber() int {
-	return getBlockNumber()
+func (r *RPC) GetLatestBlockNumber() int {
+	return r.getBlockNumber()
 }
 
-func GetProposalFee() int {
-	var response = get(GetRpcNodeUrl() + "/proposalFee/")
+func (r *RPC) GetProposalFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/proposalFee/")
 	var resp = parseRPCResponse(response)
 	return resp.ProposalFee
 }
 
-func GetProposalValidityTime() int {
-	var response = get(GetRpcNodeUrl() + "/proposalValidityTime/")
+func (r *RPC) GetProposalValidityTime() int {
+	var response = get(r.GetRpcNodeUrl() + "/proposalValidityTime/")
 	var resp = parseRPCResponse(response)
 	return resp.ProposalValidityTime
 }
 
-func GetValidatorCountLimit() int {
-	var response = get(GetRpcNodeUrl() + "/validatorCountLimit/")
+func (r *RPC) GetValidatorCountLimit() int {
+	var response = get(r.GetRpcNodeUrl() + "/validatorCountLimit/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorCountLimit
 }
 
-func GetValidatorSlashingFee() int {
-	var response = get(GetRpcNodeUrl() + "/validatorSlashingFee/")
+func (r *RPC) GetValidatorSlashingFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/validatorSlashingFee/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorSlashingFee
 }
 
-func GetValidatorOperationalFee() int {
-	var response = get(GetRpcNodeUrl() + "/validatorOperationalFee/")
+func (r *RPC) GetValidatorOperationalFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/validatorOperationalFee/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorOperationalFee
 }
 
-func GetValidatorJoiningFee() int {
-	var response = get(GetRpcNodeUrl() + "/validatorJoiningFee/")
+func (r *RPC) GetValidatorJoiningFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/validatorJoiningFee/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorJoiningFee
 }
 
-func GetMinimumDelegatingAmount() int {
-	var response = get(GetRpcNodeUrl() + "/minimumDelegatingAmount/")
+func (r *RPC) GetMinimumDelegatingAmount() int {
+	var response = get(r.GetRpcNodeUrl() + "/minimumDelegatingAmount/")
 	var resp = parseRPCResponse(response)
 	return resp.MinimumDelegatingAmount
 }
 
-func GetDelegatorsCount() int {
-	var response = get(GetRpcNodeUrl() + "/totalDelegatorsCount/")
+func (r *RPC) GetDelegatorsCount() int {
+	var response = get(r.GetRpcNodeUrl() + "/totalDelegatorsCount/")
 	var resp = parseRPCResponse(response)
 	return resp.DelegatorsCount
 }
 
-func GetValidator(address string) Validator {
-	var response = get(GetRpcNodeUrl() + "/validator/?validatorAddress=" + address)
+func (r *RPC) GetValidator(address string) Validator {
+	var response = get(r.GetRpcNodeUrl() + "/validator/?validatorAddress=" + address)
 	var resp = parseRPCResponse(response)
 	return resp.Validator
 }
 
-func GetDelegatorsOfPwr(delegatorAddress string, validatorAddress string) int {
+func (r *RPC) GetDelegatorsOfPwr(delegatorAddress string, validatorAddress string) int {
 	var response = get(
-		GetRpcNodeUrl() + "/validator/delegator/delegatedPWROfAddress/?userAddress=" +
+		r.GetRpcNodeUrl() + "/validator/delegator/delegatedPWROfAddress/?userAddress=" +
 			delegatorAddress + "&validatorAddress=" + validatorAddress,
 	)
 	var resp = parseRPCResponse(response)
 	return resp.DelegatedPWR
 }
 
-func GetSharesOfDelegator(delegatorAddress string, validatorAddress string) int {
+func (r *RPC) GetSharesOfDelegator(delegatorAddress string, validatorAddress string) int {
 	var response = get(
-		GetRpcNodeUrl() + "/validator/delegator/sharesOfAddress/?userAddress=" +
+		r.GetRpcNodeUrl() + "/validator/delegator/sharesOfAddress/?userAddress=" +
 			delegatorAddress + "&validatorAddress=" + validatorAddress,
 	)
 	var resp = parseRPCResponse(response)
 	return resp.SharesOfDelegator
 }
 
-func GetShareValue(validatorAddress string) float32 {
+func (r *RPC) GetShareValue(validatorAddress string) float32 {
 	var response = get(
-		GetRpcNodeUrl() + "/validator/shareValue/?validatorAddress=" + validatorAddress,
+		r.GetRpcNodeUrl() + "/validator/shareValue/?validatorAddress=" + validatorAddress,
 	)
 	var resp = parseRPCResponse(response)
 	return resp.ShareValue
 }
 
-func GetVmOwnerTransactionFeeShare() int {
-	var response = get(GetRpcNodeUrl() + "/vmOwnerTransactionFeeShare/")
+func (r *RPC) GetVmOwnerTransactionFeeShare() int {
+	var response = get(r.GetRpcNodeUrl() + "/vmOwnerTransactionFeeShare/")
 	var resp = parseRPCResponse(response)
 	return resp.VmOwnerTransactionFeeShare
 }
 
-func GetVmIdClaimingFee() int {
-	var response = get(GetRpcNodeUrl() + "/vmIdClaimingFee/")
+func (r *RPC) GetVmIdClaimingFee() int {
+	var response = get(r.GetRpcNodeUrl() + "/vmIdClaimingFee/")
 	var resp = parseRPCResponse(response)
 	return resp.VmIdClaimingFee
 }
 
-func GetVmDataTransactions(startingBlock int, endingBlock int, vmId int) []VMDataTransaction {
+func (r *RPC) GetVmDataTransactions(startingBlock int, endingBlock int, vmId int) []VMDataTransaction {
 	startingBlockStr := strconv.Itoa(startingBlock)
 	endingBlockStr := strconv.Itoa(endingBlock)
 	vmIdStr := strconv.Itoa(vmId)
 	var response = get(
-		GetRpcNodeUrl() + "/getVmTransactions/?startingBlock=" + startingBlockStr +
+		r.GetRpcNodeUrl() + "/getVmTransactions/?startingBlock=" + startingBlockStr +
 			"&endingBlock=" + endingBlockStr + "&vmId=" + vmIdStr,
 	)
 	var resp = parseRPCResponse(response)
 	return resp.VMDataTransaction
 }
 
-func GetVmIdAddress(vmId int) string {
+func (r *RPC) GetVmIdAddress(vmId int) string {
 	hexAddress := "0"
 	if vmId >= 0 {
 		hexAddress = "1"
@@ -245,78 +245,77 @@ func GetVmIdAddress(vmId int) string {
 	return "0x" + hexAddress
 }
 
-func GetOwnerOfVmIds(vmId int) string {
+func (r *RPC) GetOwnerOfVmIds(vmId int) string {
 	vmIdStr := strconv.Itoa(vmId)
-	var response = get(GetRpcNodeUrl() + "/ownerOfVmId/?vmId=" + vmIdStr)
+	var response = get(r.GetRpcNodeUrl() + "/ownerOfVmId/?vmId=" + vmIdStr)
 	var resp = parseRPCResponse(response)
 	return "0x" + resp.OwnerOfVmIds
 }
 
-func GetConduitsOfVmId(vmId int) []Validator {
+func (r *RPC) GetConduitsOfVmId(vmId int) []Validator {
 	vmIdStr := strconv.Itoa(vmId)
-	var response = get(GetRpcNodeUrl() + "/conduitsOfVm/?vmId=" + vmIdStr)
+	var response = get(r.GetRpcNodeUrl() + "/conduitsOfVm/?vmId=" + vmIdStr)
 	var resp = parseRPCResponse(response)
 	return resp.ConduitsOfVm
 }
 
-func GetMaxGuardianTime() int {
-	var response = get(GetRpcNodeUrl() + "/maxGuardianTime/")
+func (r *RPC) GetMaxGuardianTime() int {
+	var response = get(r.GetRpcNodeUrl() + "/maxGuardianTime/")
 	var resp = parseRPCResponse(response)
 	return resp.MaxGuardianTime
 }
 
-func GetGuardianOfAddress(address string) string {
-	var response = get(GetRpcNodeUrl() + "/guardianOf/?userAddress=" + address)
+func (r *RPC) GetGuardianOfAddress(address string) string {
+	var response = get(r.GetRpcNodeUrl() + "/guardianOf/?userAddress=" + address)
 	var resp = parseRPCResponse(response)
 	return resp.GuardianOfAddress
 }
 
-func GetActiveVotingPower() int {
-	var response = get(GetRpcNodeUrl() + "/activeVotingPower/")
+func (r *RPC) GetActiveVotingPower() int {
+	var response = get(r.GetRpcNodeUrl() + "/activeVotingPower/")
 	var resp = parseRPCResponse(response)
 	return resp.ActiveVotingPower
 }
 
-func GetStandbyValidatorsCount() int {
-	var response = get(GetRpcNodeUrl() + "/standbyValidatorsCount/")
+func (r *RPC) GetStandbyValidatorsCount() int {
+	var response = get(r.GetRpcNodeUrl() + "/standbyValidatorsCount/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorsCount
 }
 
-func GetActiveValidatorsCount() int {
-	var response = get(GetRpcNodeUrl() + "/activeValidatorsCount/")
+func (r *RPC) GetActiveValidatorsCount() int {
+	var response = get(r.GetRpcNodeUrl() + "/activeValidatorsCount/")
 	var resp = parseRPCResponse(response)
 	return resp.ValidatorsCount
 }
 
-func GetAllValidators() []Validator {
-	var response = get(GetRpcNodeUrl() + "/allValidators/")
+func (r *RPC) GetAllValidators() []Validator {
+	var response = get(r.GetRpcNodeUrl() + "/allValidators/")
 	var resp = parseRPCResponse(response)
 	return resp.Validators
 }
 
-func GetStandbyValidators() []Validator {
-	var response = get(GetRpcNodeUrl() + "/standbyValidators/")
+func (r *RPC) GetStandbyValidators() []Validator {
+	var response = get(r.GetRpcNodeUrl() + "/standbyValidators/")
 	var resp = parseRPCResponse(response)
 	return resp.Validators
 }
 
-func GetActiveValidators() []Validator {
-	var response = get(GetRpcNodeUrl() + "/activeValidators/")
+func (r *RPC) GetActiveValidators() []Validator {
+	var response = get(r.GetRpcNodeUrl() + "/activeValidators/")
 	var resp = parseRPCResponse(response)
 	return resp.Validators
 }
 
-func GetTransactionByHash(txHash string) Transaction {
-	var response = get(GetRpcNodeUrl() + "/transactionByHash/?transactionHash=" + txHash)
+func (r *RPC) GetTransactionByHash(txHash string) Transaction {
+	var response = get(r.GetRpcNodeUrl() + "/transactionByHash/?transactionHash=" + txHash)
 	var resp = parseRPCResponse(response)
-
 	return resp.Transaction
 }
 
-func GetDelegatorsOfValidator(validatorAddress string) []Delegator {
+func (r *RPC) GetDelegatorsOfValidator(validatorAddress string) []Delegator {
 	var response = get(
-		GetRpcNodeUrl() + "/validator/delegatorsOfValidator/?validatorAddress=" + validatorAddress,
+		r.GetRpcNodeUrl() + "/validator/delegatorsOfValidator/?validatorAddress=" + validatorAddress,
 	)
 	var resp = parseRPCResponse(response)
 
@@ -333,8 +332,8 @@ func GetDelegatorsOfValidator(validatorAddress string) []Delegator {
 	return delegators
 }
 
-func GetFeeBerByte() int {
-	var response = get(GetRpcNodeUrl() + "/feePerByte/")
+func (r *RPC) GetFeeBerByte() int {
+	var response = get(r.GetRpcNodeUrl() + "/feePerByte/")
 	var resp = parseRPCResponse(response)
 	return resp.FeePerByte
 }

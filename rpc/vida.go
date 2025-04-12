@@ -1,157 +1,159 @@
 package rpc
 
 import (
-    "fmt"
-    "sync/atomic"
-    "time"
+	"fmt"
+	"sync/atomic"
+	"time"
 )
 
 // VidaTransactionSubscription handles subscription to VIDA transactions
 type VidaTransactionSubscription struct {
-    vidaId             int
-    startingBlock      int
-    latestCheckedBlock int
-    handler            ProcessVidaTransactions
-    pollInterval       int
+	rpc                *RPC
+	vidaId             int
+	startingBlock      int
+	latestCheckedBlock int
+	handler            ProcessVidaTransactions
+	pollInterval       int
 
-    running atomic.Bool
-    paused  atomic.Bool
-    stopped atomic.Bool
+	running atomic.Bool
+	paused  atomic.Bool
+	stopped atomic.Bool
 }
 
 // NewVidaTransactionSubscription creates a new subscription instance
-func NewVidaTransactionSubscription(
-    vidaId int,
-    startingBlock int,
-    handler ProcessVidaTransactions,
-    pollInterval int,
+func (r *RPC) NewVidaTransactionSubscription(
+	vidaId int,
+	startingBlock int,
+	handler ProcessVidaTransactions,
+	pollInterval int,
 ) *VidaTransactionSubscription {
-    return &VidaTransactionSubscription{
-        vidaId:             vidaId,
-        startingBlock:      startingBlock,
-        latestCheckedBlock: startingBlock,
-        handler:            handler,
-        pollInterval:       pollInterval,
-    }
+	return &VidaTransactionSubscription{
+		rpc:                r,
+		vidaId:             vidaId,
+		startingBlock:      startingBlock,
+		latestCheckedBlock: startingBlock,
+		handler:            handler,
+		pollInterval:       pollInterval,
+	}
 }
 
 // Start begins the subscription process
 func (s *VidaTransactionSubscription) Start() error {
-    if s.running.Load() {
-        fmt.Println("VidaTransactionSubscription is already running")
-        return fmt.Errorf("VidaTransactionSubscription is already running")
-    } else {
+	if s.running.Load() {
+		fmt.Println("VidaTransactionSubscription is already running")
+		return fmt.Errorf("VidaTransactionSubscription is already running")
+	} else {
 		s.running.Store(true)
 		s.paused.Store(false)
 		s.stopped.Store(false)
 	}
 
-    currentBlock := s.startingBlock
+	currentBlock := s.startingBlock
 
-    go func() {
-        for !s.stopped.Load() {
-            if s.paused.Load() {
-                time.Sleep(time.Duration(s.pollInterval) * time.Millisecond)
-                continue
-            }
+	go func() {
+		for !s.stopped.Load() {
+			if s.paused.Load() {
+				time.Sleep(time.Duration(s.pollInterval) * time.Millisecond)
+				continue
+			}
 
-            func() {
-                defer func() {
-                    if r := recover(); r != nil {
-                        fmt.Printf("Error in subscription: %v\n", r)
-                    }
-                }()
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						fmt.Printf("Error in subscription: %v\n", r)
+					}
+				}()
 
-                latestBlock := GetLatestBlockNumber()
-                
-                effectiveLatestBlock := latestBlock
-                if latestBlock > currentBlock+1000 {
-                    effectiveLatestBlock = currentBlock + 1000
-                }
+				latestBlock := s.rpc.GetLatestBlockNumber()
 
-                if effectiveLatestBlock >= currentBlock {
-                    transactions := GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
+				effectiveLatestBlock := latestBlock
+				if latestBlock > currentBlock+1000 {
+					effectiveLatestBlock = currentBlock + 1000
+				}
 
-                    for _, tx := range transactions {
-                        s.handler(tx)
-                    }
+				if effectiveLatestBlock >= currentBlock {
+					transactions := s.rpc.GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
 
-                    s.latestCheckedBlock = effectiveLatestBlock
-                    currentBlock = effectiveLatestBlock + 1
-                }
-            }()
+					for _, tx := range transactions {
+						s.handler(tx)
+					}
 
-            time.Sleep(time.Duration(s.pollInterval) * time.Millisecond)
-        }
+					s.latestCheckedBlock = effectiveLatestBlock
+					currentBlock = effectiveLatestBlock + 1
+				}
+			}()
 
-        s.running.Store(false)
-    }()
+			time.Sleep(time.Duration(s.pollInterval) * time.Millisecond)
+		}
 
-    return nil
+		s.running.Store(false)
+	}()
+
+	return nil
 }
 
 func (s *VidaTransactionSubscription) Pause() {
-    s.paused.Store(true)
+	s.paused.Store(true)
 }
 
 func (s *VidaTransactionSubscription) Resume() {
-    s.paused.Store(false)
+	s.paused.Store(false)
 }
 
 func (s *VidaTransactionSubscription) Stop() {
-    s.stopped.Store(true)
+	s.stopped.Store(true)
 }
 
 func (s *VidaTransactionSubscription) IsRunning() bool {
-    return s.running.Load()
+	return s.running.Load()
 }
 
 func (s *VidaTransactionSubscription) IsPaused() bool {
-    return s.paused.Load()
+	return s.paused.Load()
 }
 
 func (s *VidaTransactionSubscription) IsStopped() bool {
-    return s.stopped.Load()
+	return s.stopped.Load()
 }
 
 func (s *VidaTransactionSubscription) GetStartingBlock() int {
-    return s.startingBlock
+	return s.startingBlock
 }
 
 func (s *VidaTransactionSubscription) GetLatestCheckedBlock() int {
-    return s.latestCheckedBlock
+	return s.latestCheckedBlock
 }
 
 func (s *VidaTransactionSubscription) GetVidaId() int {
-    return s.vidaId
+	return s.vidaId
 }
 
 func (s *VidaTransactionSubscription) GetHandler() ProcessVidaTransactions {
-    return s.handler
+	return s.handler
 }
 
 // SubscribeToVidaTransactions creates and starts a subscription
-func SubscribeToVidaTransactions(
-    vidaId int,
-    startingBlock int,
-    handler ProcessVidaTransactions,
-    pollInterval ...int,
+func (r *RPC) SubscribeToVidaTransactions(
+	vidaId int,
+	startingBlock int,
+	handler ProcessVidaTransactions,
+	pollInterval ...int,
 ) *VidaTransactionSubscription {
-    interval := 100
-    if len(pollInterval) > 0 {
-        interval = pollInterval[0]
-    }
+	interval := 100
+	if len(pollInterval) > 0 {
+		interval = pollInterval[0]
+	}
 
-    subscription := NewVidaTransactionSubscription(
-        vidaId,
-        startingBlock,
-        handler,
-        interval,
-    )
-    
-    if err := subscription.Start(); err != nil {
-        fmt.Printf("Subscription error: %v\n", err)
-    }
+	subscription := r.NewVidaTransactionSubscription(
+		vidaId,
+		startingBlock,
+		handler,
+		interval,
+	)
 
-    return subscription
+	if err := subscription.Start(); err != nil {
+		fmt.Printf("Subscription error: %v\n", err)
+	}
+
+	return subscription
 }
