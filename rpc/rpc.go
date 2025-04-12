@@ -5,18 +5,20 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-func SetRpcNodeUrl(url string) {
-	rpcEndpoint = url
+func SetRpcNodeUrl(url string) *RPC {
+	return &RPC{
+		RpcEndpoint: url,
+	}
 }
 
-func GetRpcNodeUrl() string {
-	return rpcEndpoint
+func (r *RPC) GetRpcNodeUrl() string {
+	return r.RpcEndpoint
 }
 
-func BroadcastTransaction(txn_bytes []byte) BroadcastResponse {
+func (r *RPC) BroadcastTransaction(txn_bytes []byte) BroadcastResponse {
 	var transferTx = hexutil.Encode(txn_bytes)
 	var transferTxn = `{"txn":"` + transferTx[2:] + `"}`
-	result := post(GetRpcNodeUrl()+"/broadcast/", transferTxn)
+	result := post(r.GetRpcNodeUrl()+"/broadcast/", transferTxn)
 
 	hash := crypto.Keccak256Hash(txn_bytes)
 	txResponse := parseBroadcastResponse(result)

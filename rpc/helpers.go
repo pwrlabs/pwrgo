@@ -1,27 +1,25 @@
 package rpc
 
 import (
+	"bytes"
 	"encoding/json"
-    "log"
-    "net/http"
-    "io"
-    "bytes"
+	"io"
+	"log"
+	"net/http"
 )
 
-var rpcEndpoint = "https://pwrrpc.pwrlabs.io"
-
 func get(url string) (response string) {
-   	resp, err := http.Get(url)
-   	if err != nil {
-   	   log.Fatalln(err)
-   	}
-
-   	body, err := io.ReadAll(resp.Body)
+	resp, err := http.Get(url)
 	if err != nil {
-   	   log.Fatalln(err)
+		log.Fatalln(err)
 	}
-   	response = string(body)
-   	return
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	response = string(body)
+	return
 }
 
 func parseRPCResponse(responseStr string) (response RPCResponse) {
@@ -37,26 +35,26 @@ func parseRPCResponse(responseStr string) (response RPCResponse) {
 }
 
 func parseBroadcastResponse(responseStr string) (response BroadcastResponse) {
-    err := json.Unmarshal([]byte(responseStr), &response)
-    if err != nil {
-        log.Fatalf("Error unmarshaling: %s", err)
-    }
-    return
+	err := json.Unmarshal([]byte(responseStr), &response)
+	if err != nil {
+		log.Fatalf("Error unmarshaling: %s", err)
+	}
+	return
 }
 
 func post(url string, jsonStr string) string {
-    var jsonBytes = []byte(jsonStr)
-    req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
+	var jsonBytes = []byte(jsonStr)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 
-    req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    body, _ := io.ReadAll(resp.Body)
-    return string(body)
+	body, _ := io.ReadAll(resp.Body)
+	return string(body)
 }

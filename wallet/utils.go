@@ -1,28 +1,29 @@
 package wallet
 
 import (
-	"os"
-	"encoding/hex"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"log"
+	"os"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 func SignMessage(message []byte, account *PWRWallet) ([]byte, error) {
 	messageHash := crypto.Keccak256(message)
 	signature, err := crypto.Sign(messageHash, account.privateKey)
- 
+
 	if err != nil {
-	   	return nil, err
+		return nil, err
 	}
-	
-	if signature[64] == 0 || signature[64] ==  1 {
-	  	signature[64] += 27
-	} 
-	
+
+	if signature[64] == 0 || signature[64] == 1 {
+		signature[64] += 27
+	}
+
 	return signature, nil
 }
 
@@ -35,7 +36,7 @@ func SignTx(buffer []byte, account *PWRWallet) ([]byte, error) {
 	return txn_bytes, nil
 }
 
-func FromPrivateKey(privateKeyStr string) *PWRWallet {
+func FromPrivateKey(privateKeyStr string, rpcEndpoint ...string) *PWRWallet {
 	if privateKeyStr[0:2] == "0x" {
 		privateKeyStr = privateKeyStr[2:]
 	}
@@ -45,15 +46,16 @@ func FromPrivateKey(privateKeyStr string) *PWRWallet {
 		log.Fatal(err.Error())
 	}
 
-	return privateKeyToWallet(privateKey)
+	return privateKeyToWallet(privateKey, rpcEndpoint...)
 }
 
-func NewWallet() *PWRWallet {
+func NewWallet(rpcEndpoint ...string) *PWRWallet {
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	return privateKeyToWallet(privateKey)
+
+	return privateKeyToWallet(privateKey, rpcEndpoint...)
 }
 
 func LoadWallet(path string, password string) (*PWRWallet, error) {
@@ -71,16 +73,22 @@ func LoadWallet(path string, password string) (*PWRWallet, error) {
 	return FromPrivateKey(privateKey), nil
 }
 
-func privateKeyToWallet (privateKey *ecdsa.PrivateKey) *PWRWallet {
+func privateKeyToWallet(privateKey *ecdsa.PrivateKey, rpcEndpoint ...string) *PWRWallet {
+	endpoint := "https://pwrrpc.pwrlabs.io"
+	if len(rpcEndpoint) > 0 {
+		endpoint = rpcEndpoint[0]
+	}
+
 	publicKey := &privateKey.PublicKey
 	publicKeyStr := hexutil.Encode(crypto.FromECDSAPub(publicKey))
 	privateKeyStr := hexutil.Encode(crypto.FromECDSA(privateKey))
 	address := crypto.PubkeyToAddress(*publicKey)
-		
+
 	var wallet = new(PWRWallet)
 	wallet.privateKey = privateKey
 	wallet.publicKey = publicKeyStr
 	wallet.address = address.Hex()
 	wallet.privateKeyStr = privateKeyStr
+	wallet.rpc = rpc.SetRpcNodeUrl(endpoint)
 	return wallet
 }

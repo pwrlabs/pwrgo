@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"os"
-	"github.com/pwrlabs/pwrgo/rpc"
 	"github.com/pwrlabs/pwrgo/encode"
 )
 
@@ -19,12 +18,12 @@ func (w *PWRWallet) GetPublicKey() string {
 }
 
 func (w *PWRWallet) GetNonce() int {
-	nonce := rpc.GetNonceOfAddress(w.address)
+	nonce := w.rpc.GetNonceOfAddress(w.address)
 	return nonce
 }
 
 func (w *PWRWallet) GetBalance() int {
-	nonce := rpc.GetBalanceOfAddress(w.address)
+	nonce := w.rpc.GetBalanceOfAddress(w.address)
 	return nonce
 }
 

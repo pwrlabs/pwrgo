@@ -19,7 +19,7 @@ func (w *Falcon512Wallet) SetPublicKey(publicKey []byte, feePerByte int) (rpc.Br
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) JoinAsValidator(ip string, feePerByte int) (rpc.BroadcastResponse) {
@@ -37,7 +37,7 @@ func (w *Falcon512Wallet) JoinAsValidator(ip string, feePerByte int) (rpc.Broadc
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) Delegate(to string, amount int, feePerByte int) (rpc.BroadcastResponse) {
@@ -55,7 +55,7 @@ func (w *Falcon512Wallet) Delegate(to string, amount int, feePerByte int) (rpc.B
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) ChangeIp(newIp string, feePerByte int) (rpc.BroadcastResponse) {
@@ -73,7 +73,7 @@ func (w *Falcon512Wallet) ChangeIp(newIp string, feePerByte int) (rpc.BroadcastR
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) ClaimActiveNodeSpot(feePerByte int) (rpc.BroadcastResponse) {
@@ -91,7 +91,7 @@ func (w *Falcon512Wallet) ClaimActiveNodeSpot(feePerByte int) (rpc.BroadcastResp
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) TransferPWR(to string, amount int, feePerByte int) (rpc.BroadcastResponse) {
@@ -113,7 +113,7 @@ func (w *Falcon512Wallet) TransferPWR(to string, amount int, feePerByte int) (rp
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *Falcon512Wallet) SendVMData(vmId int, data []byte, feePerByte int) (rpc.BroadcastResponse) {
@@ -131,7 +131,7 @@ func (w *Falcon512Wallet) SendVMData(vmId int, data []byte, feePerByte int) (rpc
         log.Fatal("Failed to sign message: ", err.Error())
     }
 
-	return rpc.BroadcastTransaction(txn_bytes)
+	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func makeSurePublicKeyIsSet(feePerByte int, w *Falcon512Wallet) *rpc.BroadcastResponse {

@@ -2,6 +2,10 @@ package rpc
 
 import "math/big"
 
+type RPC struct {
+	RpcEndpoint string
+}
+
 type ProcessVidaTransactions func(transaction VMDataTransaction)
 
 type Transaction struct {
