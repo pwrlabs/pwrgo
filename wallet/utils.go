@@ -36,7 +36,7 @@ func SignTx(buffer []byte, account *PWRWallet) ([]byte, error) {
 	return txn_bytes, nil
 }
 
-func FromPrivateKey(privateKeyStr string, rpcEndpoint ...string) *PWRWallet {
+func FromPrivateKey(privateKeyStr string, rpcEndpoint ...*rpc.RPC) *PWRWallet {
 	if privateKeyStr[0:2] == "0x" {
 		privateKeyStr = privateKeyStr[2:]
 	}
@@ -49,7 +49,7 @@ func FromPrivateKey(privateKeyStr string, rpcEndpoint ...string) *PWRWallet {
 	return privateKeyToWallet(privateKey, rpcEndpoint...)
 }
 
-func NewWallet(rpcEndpoint ...string) *PWRWallet {
+func NewWallet(rpcEndpoint ...*rpc.RPC) *PWRWallet {
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -58,7 +58,7 @@ func NewWallet(rpcEndpoint ...string) *PWRWallet {
 	return privateKeyToWallet(privateKey, rpcEndpoint...)
 }
 
-func LoadWallet(path string, password string) (*PWRWallet, error) {
+func LoadWallet(path string, password string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	encryptedData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -70,13 +70,13 @@ func LoadWallet(path string, password string) (*PWRWallet, error) {
 	}
 
 	privateKey := hex.EncodeToString(privateKeyBytes)
-	return FromPrivateKey(privateKey), nil
+	return FromPrivateKey(privateKey, rpcEndpoint...), nil
 }
 
-func privateKeyToWallet(privateKey *ecdsa.PrivateKey, rpcEndpoint ...string) *PWRWallet {
+func privateKeyToWallet(privateKey *ecdsa.PrivateKey, rpcEndpoint ...*rpc.RPC) *PWRWallet {
 	endpoint := "https://pwrrpc.pwrlabs.io"
 	if len(rpcEndpoint) > 0 {
-		endpoint = rpcEndpoint[0]
+		endpoint = rpcEndpoint[0].GetRpcNodeUrl()
 	}
 
 	publicKey := &privateKey.PublicKey
