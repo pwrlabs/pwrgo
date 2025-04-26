@@ -1,94 +1,93 @@
 package wallet
 
 import (
-	"crypto/ecdsa"
-	"encoding/hex"
-	"log"
+	"encoding/binary"
+	"errors"
+	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ebfe/keccak"
 	"github.com/pwrlabs/pwrgo/encode"
 	"github.com/pwrlabs/pwrgo/rpc"
 )
 
-func SignMessage(message []byte, account *PWRWallet) ([]byte, error) {
-	messageHash := crypto.Keccak256(message)
-	signature, err := crypto.Sign(messageHash, account.privateKey)
-
+// New creates a new PWRWallet with generated keys
+func New(rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	keyPair, err := encode.GenerateKeyPair(9) // 9 for Falcon-512
 	if err != nil {
 		return nil, err
 	}
 
-	if signature[64] == 0 || signature[64] == 1 {
-		signature[64] += 27
-	}
+	wallet, _ := FromKeys(
+		keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
+	)
 
-	return signature, nil
+	return wallet, nil
 }
 
-func SignTx(buffer []byte, account *PWRWallet) ([]byte, error) {
-	signature, err := SignMessage(buffer, account)
-	if err != nil {
-		return nil, err
-	}
-	txn_bytes := append(buffer, signature...)
-	return txn_bytes, nil
-}
+// FromKeys creates a wallet from existing keys
+func FromKeys(publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	// Get the hash of the public key
+	hash := hash224(publicKey)
+	address := hash[:20]
 
-func FromPrivateKey(privateKeyStr string, rpcEndpoint ...*rpc.RPC) *PWRWallet {
-	if privateKeyStr[0:2] == "0x" {
-		privateKeyStr = privateKeyStr[2:]
-	}
-
-	privateKey, err := crypto.HexToECDSA(privateKeyStr)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return privateKeyToWallet(privateKey, rpcEndpoint...)
-}
-
-func NewWallet(rpcEndpoint ...*rpc.RPC) *PWRWallet {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return privateKeyToWallet(privateKey, rpcEndpoint...)
-}
-
-func LoadWallet(path string, password string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	encryptedData, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	privateKeyBytes, err := encode.Decrypt(encryptedData, password)
-	if err != nil {
-		return nil, err
-	}
-
-	privateKey := hex.EncodeToString(privateKeyBytes)
-	return FromPrivateKey(privateKey, rpcEndpoint...), nil
-}
-
-func privateKeyToWallet(privateKey *ecdsa.PrivateKey, rpcEndpoint ...*rpc.RPC) *PWRWallet {
 	endpoint := "https://pwrrpc.pwrlabs.io"
 	if len(rpcEndpoint) > 0 {
 		endpoint = rpcEndpoint[0].GetRpcNodeUrl()
 	}
 
-	publicKey := &privateKey.PublicKey
-	publicKeyStr := hexutil.Encode(crypto.FromECDSAPub(publicKey))
-	privateKeyStr := hexutil.Encode(crypto.FromECDSA(privateKey))
-	address := crypto.PubkeyToAddress(*publicKey)
+	return &PWRWallet{
+		PublicKey:  publicKey,
+		PrivateKey: privateKey,
+		Address:    address,
+		rpc:        rpc.SetRpcNodeUrl(endpoint),
+	}, nil
+}
 
-	var wallet = new(PWRWallet)
-	wallet.privateKey = privateKey
-	wallet.publicKey = publicKeyStr
-	wallet.address = address.Hex()
-	wallet.privateKeyStr = privateKeyStr
-	wallet.rpc = rpc.SetRpcNodeUrl(endpoint)
-	return wallet
+// LoadWallet loads a wallet from a file
+func LoadWallet(filePath string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) < 8 { // At minimum we need two 4-byte length fields
+		return nil, fmt.Errorf("file too small: %d bytes", len(data))
+	}
+
+	// Read public key length
+	pubLength := binary.BigEndian.Uint32(data[0:4])
+	if pubLength == 0 || pubLength > 2048 {
+		return nil, fmt.Errorf("invalid public key length: %d", pubLength)
+	}
+
+	if 4+pubLength > uint32(len(data)) {
+		return nil, fmt.Errorf("file too small for public key of length %d", pubLength)
+	}
+
+	publicKeyBytes := data[4 : 4+pubLength]
+
+	// Read private key length
+	if 4+pubLength+4 > uint32(len(data)) {
+		return nil, errors.New("file too small for secret key length")
+	}
+
+	secLength := binary.BigEndian.Uint32(data[4+pubLength : 8+pubLength])
+	if secLength == 0 || secLength > 4096 {
+		return nil, fmt.Errorf("invalid secret key length: %d", secLength)
+	}
+
+	if 8+pubLength+secLength > uint32(len(data)) {
+		return nil, fmt.Errorf("file too small for secret key of length %d", secLength)
+	}
+
+	privateKeyBytes := data[8+pubLength : 8+pubLength+secLength]
+
+	return FromKeys(publicKeyBytes, privateKeyBytes, rpcEndpoint...)
+}
+
+func hash224(input []byte) []byte {
+	hasher := keccak.New224()
+	hasher.Write(input)
+	return hasher.Sum(nil)
 }
