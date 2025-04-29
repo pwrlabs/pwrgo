@@ -72,7 +72,7 @@ func (s *VidaTransactionSubscription) Start() error {
 				}
 
 				if effectiveLatestBlock >= currentBlock {
-					transactions := s.rpc.GetVmDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
+					transactions := s.rpc.GetVidaDataTransactions(currentBlock, effectiveLatestBlock, s.vidaId)
 
 					for _, tx := range transactions {
 						s.handler(tx)

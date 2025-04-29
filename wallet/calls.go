@@ -1,38 +1,88 @@
 package wallet
 
 import (
+	"encoding/binary"
+	"encoding/hex"
 	"os"
+	"path/filepath"
+
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 func (w *PWRWallet) GetAddress() string {
-	return w.address
+	return "0x" + hex.EncodeToString(w.Address)
 }
 
-func (w *PWRWallet) GetPrivateKey() string {
-	return w.privateKeyStr
+func (w *PWRWallet) GetPublicKey() []byte {
+	return w.PublicKey
 }
 
-func (w *PWRWallet) GetPublicKey() string {
-	return w.publicKey
-}
-
-func (w *PWRWallet) GetNonce() int {
-	nonce := w.rpc.GetNonceOfAddress(w.address)
-	return nonce
+func (w *PWRWallet) GetPrivateKey() []byte {
+	return w.PrivateKey
 }
 
 func (w *PWRWallet) GetBalance() int {
-	nonce := w.rpc.GetBalanceOfAddress(w.address)
+	balance := w.rpc.GetBalanceOfAddress(w.GetAddress())
+	return balance
+}
+
+func (w *PWRWallet) GetNonce() int {
+	nonce := w.rpc.GetNonceOfAddress(w.GetAddress())
 	return nonce
 }
 
-func (w *PWRWallet) StoreWallet(path string, password string) error {
-	privateKeyBytes := w.privateKey.D.Bytes()
-	encryptedData, err := encode.Encrypt(privateKeyBytes, password)
+// Sign signs a message with the wallet's private key
+func (w *PWRWallet) SignTx(transaction []byte) ([]byte, error) {
+	txnHash := crypto.Keccak256Hash(transaction)
+
+	signature, err := encode.Sign(txnHash.Bytes(), w.PrivateKey, encode.SigCompressed)
 	if err != nil {
+		return nil, err
+	}
+
+	signatureLenBytes := encode.DecToBytes(len(signature), 2)
+
+	txn_bytes := make([]byte, len(transaction))
+	copy(txn_bytes, transaction)
+
+	txn_bytes = append(txn_bytes, signature...)
+	txn_bytes = append(txn_bytes, signatureLenBytes...)
+
+	return txn_bytes, nil
+}
+
+// VerifySign verifies a signature against the wallet's public key
+func (w *PWRWallet) VerifySign(message, signature []byte) bool {
+	err := encode.Verify(signature, message, w.PublicKey, encode.SigCompressed)
+	return err == nil
+}
+
+// StoreWallet stores the wallet to a file
+func (w *PWRWallet) StoreWallet(filePath string) error {
+	var buffer []byte
+
+	// Add public key length and data
+	pubKeyLengthBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(pubKeyLengthBytes, uint32(len(w.PublicKey)))
+	buffer = append(buffer, pubKeyLengthBytes...)
+	buffer = append(buffer, w.PublicKey...)
+
+	// Add private key length and data
+	privKeyLengthBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(privKeyLengthBytes, uint32(len(w.PrivateKey)))
+	buffer = append(buffer, privKeyLengthBytes...)
+	buffer = append(buffer, w.PrivateKey...)
+
+	dir := filepath.Dir(filePath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
 
-	return os.WriteFile(path, encryptedData, 0600)
+	return os.WriteFile(filePath, buffer, 0600)
+}
+
+func (w *PWRWallet) GetRpc() *rpc.RPC {
+	return w.rpc
 }

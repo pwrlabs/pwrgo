@@ -2,601 +2,880 @@ package wallet
 
 import (
 	"log"
+
 	"github.com/pwrlabs/pwrgo/encode"
 	"github.com/pwrlabs/pwrgo/rpc"
 )
 
-func (w *PWRWallet) TransferPWR(to string, amount int) (rpc.BroadcastResponse) {
-    if len(to) != 42 {
-        log.Fatal("Invalid address: ", to)
-    }
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-	}
-
-    var buffer []byte
-    buffer,err := encode.TransferTxBytes(amount, to, nonce)
-
-    if err != nil {
-        log.Fatal("Failed to get tx bytes: ", err.Error())
-    }
-
-    txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ClaimVMId(vmId int) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-	}
-
-    var buffer []byte
-    buffer, err := encode.ClaimVMIdBytes(vmId, nonce)
+func (w *PWRWallet) SetPublicKey(publicKey []byte, feePerByte int) rpc.BroadcastResponse {
+	var buffer []byte
+	buffer, err := encode.SetPublicKeyBytes(publicKey, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
-        log.Fatal("Failed to get claimVMIdBytes: ", err.Error())
-    }
-
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) Join(ipAddress string) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
+		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
 
-    var buffer []byte
-    buffer, err := encode.JoinBytes(ipAddress, nonce)
+	txn_bytes, err := w.SignTx(buffer)
 	if err != nil {
-        log.Fatal("Failed to get joinBytes: ", err.Error())
-    }
-
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-
-func (w *PWRWallet) ValidatorRemove(validatorAddress string) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
+		log.Fatal("Failed to sign message: ", err.Error())
 	}
 
-    var buffer []byte
-    buffer, err := encode.ValidatorRemoveBytes(validatorAddress, nonce)
-	if err != nil {
-        log.Fatal("Failed to get validatorRemoveBytes: ", err.Error())
-    }
-
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ClaimActiveNodeSpot() (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
+func (w *PWRWallet) JoinAsValidator(ip string, feePerByte int) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
 	}
-
-    var buffer []byte
-    buffer, err := encode.ClaimActiveNodeSpotBytes(nonce)
-	if err != nil {
-        log.Fatal("Failed to get claimActiveNodeSpotBytes: ", err.Error())
-    }
-	
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) Delegate(validator string, amount int) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
 
 	var buffer []byte
-    buffer, err := encode.DelegateTxBytes(validator, amount, nonce)
-    if err != nil {
-        log.Fatal("Failed to get DelegateTx bytes: ", err.Error())
-    }
+	buffer, err := encode.JoinAsValidatorBytes(ip, w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) Withdraw(validator string, amount int) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) Delegate(to string, amount int, feePerByte int) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
 	var buffer []byte
-    buffer, err := encode.WithdrawTxBytes(validator, amount, nonce)
-    if err != nil {
-        log.Fatal("Failed to get withdrawTx bytes: ", err.Error())
-    }
+	buffer, err := encode.DelegateTxBytes(to, amount, w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-
-func (w *PWRWallet) SetGuardian(guardian string, expiration int) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ChangeIp(newIp string, feePerByte int) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
 	var buffer []byte
-    buffer, err := encode.SetGuardianTxBytes(guardian, expiration, nonce)
-    if err != nil {
-        log.Fatal("Failed to get setGuardian bytes: ", err.Error())
-    }
+	buffer, err := encode.ChangeIpBytes(newIp, w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) RemoveGuardian() rpc.BroadcastResponse {
-    nonce := w.GetNonce()
-	if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ClaimActiveNodeSpot(feePerByte int) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
 	var buffer []byte
-    buffer, err := encode.RemoveGuardianTxBytes(nonce)
-    if err != nil {
-        log.Fatal("Failed to get txnBaseBytes: ", err.Error())
-    }
+	buffer, err := encode.ClaimActiveNodeSpotBytes(w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
-
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) SetConduits(vmId int, conduits []string) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.SetConduitTxBytes(vmId, conduits, nonce)
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) AddConduitTransaction(vmId int, transaction []byte) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) TransferPWR(to string, amount int, feePerByte int) rpc.BroadcastResponse {
+	if len(to) != 42 {
+		log.Fatal("Invalid address: ", to)
+	}
 
-    var buffer []byte
-    buffer, err := encode.AddConduitTxBytes(vmId, transaction, nonce)
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.TransferTxBytes(amount, to, w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) SendGuardianApprovalTransaction(tx []byte) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.GuardianApprovalTransaction(tx, nonce)
-    if err != nil {
-        log.Fatal("Failed to get guardianWrappedTxBytes: ", err.Error())
-    }
-
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) SendVMData(vmId int, data []byte) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeEarlyWithdrawPenalty(
+	title string, description string, withdraw_penalty_time int,
+	withdraw_penalty int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.VmDataBytes(vmId, data, nonce)
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.EarlyWithdrawPenaltyProposal(
+		title, description, withdraw_penalty_time, withdraw_penalty, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) SendPayableVMData(vmId int, amount int, data []byte) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.PayableVmDataBytes(vmId, data, amount, nonce)
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) MoveStake(shares int, from_validator string, to_validator string) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeFeePerByte(
+	title string, description string, feePerByte int, _feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(_feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.MoveStakeTxBytes(shares, from_validator, to_validator, nonce)
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeFeePerByteProposalTx(
+		title, description, feePerByte, w.GetNonce(), w.Address, _feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ChangeEarlyWithdrawPenaltyProposal(
-    withdraw_penalty int, withdraw_penalty_time int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.ChangeEarlyWithdrawPenaltyProposalTxBytes(
-        title, description, withdraw_penalty_time, withdraw_penalty, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ChangeFeePerByteProposal(
-    fee_per_byte int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeMaxBlockSize(
+	title string, description string, maxBlockSize int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.ChangeFeePerByteProposalTxBytes(
-        title, description, fee_per_byte, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeMaxBlockSizeProposalTx(
+		title, description, maxBlockSize, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ChangeMaxBlockSizeProposal(
-    max_block_size int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.ChangeMaxBlockSizeProposalTxBytes(
-        title, description, max_block_size, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ChangeMaxTxnSizeProposal(
-    max_txn_size int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeMaxTxnSize(
+	title string, description string, maxTxnSize int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.ChangeMaxTxnSizeProposalTxBytes(
-        title, description, max_txn_size, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeMaxTxnSizeProposalTx(
+		title, description, maxTxnSize, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ChangeOverallBurnPercentageProposal(
-    burn_percentage int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.ChangeOverallBurnPercentageProposalTxBytes(
-        title, description, burn_percentage, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ChangeRewardPerYearProposal(
-    burn_percentage int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeOverallBurnPercentage(
+	title string, description string, burnPercentage int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.ChangeRewardPerYearProposalTxBytes(
-        title, description, burn_percentage, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeOverallBurnPercentageProposalTx(
+		title, description, burnPercentage, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ChangeValidatorCountLimitProposal(
-    validator_count_limit int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.ChangeValidatorCountLimitProposalTxBytes(
-        title, description, validator_count_limit, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ChangeValidatorJoiningFeeProposal(
-    joining_fee int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeRewardPerYear(
+	title string, description string, rewardPerYear int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.ChangeValidatorJoiningFeeProposalTxBytes(
-        title, description, joining_fee, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeRewardPerYearProposalTx(
+		title, description, rewardPerYear, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
 
-	return w.rpc.BroadcastTransaction(txn_bytes)
-}
-
-func (w *PWRWallet) ChangeVmIdClaimingFeeProposal(
-    claiming_fee int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
-
-    var buffer []byte
-    buffer, err := encode.ChangeVmIdClaimingFeeProposalTxBytes(
-        title, description, claiming_fee, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) ChangeVmOwnerTxnFeeShareProposal(
-    fee_share int, title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeValidatorCountLimit(
+	title string, description string, validatorCountLimit int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.ChangeVmOwnerTxnFeeShareProposalTxBytes(
-        title, description, fee_share, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeValidatorCountLimitProposalTx(
+		title, description, validatorCountLimit, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) OtherProposal(
-    title string, description string,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+func (w *PWRWallet) ProposeChangeValidatorJoiningFee(
+	title string, description string, joiningFee int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.OtherProposalTxBytes(
-        title, description, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.ChangeValidatorJoiningFeeProposalTx(
+		title, description, joiningFee, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) ProposeChangeVidaIdClaimingFee(
+	title string, description string, vidaIdClaimingFee int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.ChangeVidaIdClaimingFeeProposalTx(
+		title, description, vidaIdClaimingFee, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) ProposeChangeVmOwnerTxnFeeShare(
+	title string, description string, vmOwnerTxnFeeShare int, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.ChangeVmOwnerTxnFeeShareProposalTx(
+		title, description, vmOwnerTxnFeeShare, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) ProposeOther(
+	title string, description string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.OtherProposalTx(
+		title, description, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
 func (w *PWRWallet) VoteOnProposal(
-    proposal_hash string, vote int,
-) (rpc.BroadcastResponse) {
-    nonce := w.GetNonce()
-    if nonce < 0 {
-        log.Fatal("Nonce cannot be negative: ", nonce)
-    }
+	proposalHash []byte, vote byte, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
 
-    var buffer []byte
-    buffer, err := encode.VoteOnProposalTxBytes(
-        proposal_hash, vote, nonce,
-    )
-    if err != nil {
-        log.Fatal("Failed to get vm data bytes: ", err.Error())
-    }
-    
-	txn_bytes, err := SignTx(buffer, w)
-    if err != nil {
-        log.Fatal("Failed to sign message: ", err.Error())
-    }
+	var buffer []byte
+	buffer, err := encode.VoteOnProposalTx(
+		proposalHash, vote, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
 
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
+func (w *PWRWallet) GuardianApproval(
+	wrappedTxns [][]byte, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.GuardianApprovalTransaction(
+		wrappedTxns, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) RemoveGuardian(feePerByte int) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.RemoveGuardianTransaction(w.GetNonce(), w.Address, feePerByte)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) SetGuardian(
+	expiryDate int, guardianAddress string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.SetGuardianTransaction(
+		expiryDate, guardianAddress, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) MoveStake(
+	sharesAmount int64, fromValidator string, toValidator string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.MoveStakeTransaction(
+		sharesAmount, fromValidator, toValidator, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) RemoveValidator(
+	validatorAddress string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.RemoveValidatorTransaction(
+		validatorAddress, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) Withdraw(
+	sharesAmount int, validator string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.WithdrawTransaction(
+		sharesAmount, validator, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) ClaimVidaId(
+	vidaId int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.ClaimVidaIdTransaction(
+		vidaId, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) ConduitApproval(
+	vidaId int64, wrappedTxns [][]byte, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.ConduitApprovalTransaction(
+		vidaId, wrappedTxns, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) PayableVidaData(
+	vidaId int64, data []byte, value int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.PayableVidaDataTransaction(
+		vidaId, data, value, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) RemoveConduits(
+	vidaId int64, conduits [][]byte, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.RemoveConduitsTransaction(
+		vidaId, conduits, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) SetConduitMode(
+	vidaId int64, mode byte, conduitThreshold int, conduits [][]byte,
+	conduitsWithVotingPower map[string]int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.SetConduitModeTransaction(
+		vidaId, mode, conduitThreshold, conduits, conduitsWithVotingPower,
+		w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) SetVidaPrivateState(
+	vidaId int64, privateState bool, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.SetVidaPrivateStateTransaction(
+		vidaId, privateState, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) SetVidaToAbsolutePublic(
+	vidaId int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.SetVidaToAbsolutePublicTransaction(
+		vidaId, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) AddVidaSponsoredAddresses(
+	vidaId int64, sponsoredAddresses []string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.AddVidaSponsoredAddressesTransaction(
+		vidaId, sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) AddVidaAllowedSenders(
+	vidaId int64, allowedSenders []string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.AddVidaAllowedSendersTransaction(
+		vidaId, allowedSenders, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) RemoveVidaAllowedSenders(
+	vidaId int64, allowedSenders []string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.RemoveVidaAllowedSendersTransaction(
+		vidaId, allowedSenders, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) RemoveSponsoredAddresses(
+	vidaId int64, sponsoredAddresses []string, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.RemoveSponsoredAddressesTransaction(
+		vidaId, sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) SetPWRTransferRights(
+	vidaId int64, ownerCanTransferPWR bool, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.SetPWRTransferRightsTransaction(
+		vidaId, ownerCanTransferPWR, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func (w *PWRWallet) TransferPWRFromVida(
+	vidaId int64, receiver string, amount int64, feePerByte int,
+) rpc.BroadcastResponse {
+	response := makeSurePublicKeyIsSet(feePerByte, w)
+	if response != nil && !response.Success {
+		return *response
+	}
+
+	var buffer []byte
+	buffer, err := encode.TransferPWRFromVidaTransaction(
+		vidaId, receiver, amount, w.GetNonce(), w.Address, feePerByte,
+	)
+	if err != nil {
+		log.Fatal("Failed to get tx bytes: ", err.Error())
+	}
+
+	txn_bytes, err := w.SignTx(buffer)
+	if err != nil {
+		log.Fatal("Failed to sign message: ", err.Error())
+	}
+
+	return w.rpc.BroadcastTransaction(txn_bytes)
+}
+
+func makeSurePublicKeyIsSet(feePerByte int, w *PWRWallet) *rpc.BroadcastResponse {
+	nonce := w.GetNonce()
+
+	if nonce == 0 {
+		tx := w.SetPublicKey(w.PublicKey, feePerByte)
+		return &tx
+	}
+
+	return nil
+}

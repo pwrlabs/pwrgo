@@ -63,7 +63,7 @@ type RPCResponse struct {
 	SharesOfDelegator          int                 `json:"shares,omitempty"`
 	VmIdClaimingFee            int                 `json:"vmIdClaimingFee,omitempty"`
 	VmOwnerTransactionFeeShare int                 `json:"vmOwnerTransactionFeeShare,omitempty"`
-	OwnerOfVmIds               string              `json:"owner,omitempty"`
+	OwnerOfVidaIds             string              `json:"owner,omitempty"`
 	GuardianOfAddress          string              `json:"guardian,omitempty"`
 	ShareValue                 float32             `json:"shareValue,omitempty"`
 	Delegators                 map[string]int64    `json:"delegators,omitempty"`
