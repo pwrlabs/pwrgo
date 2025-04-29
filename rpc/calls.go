@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/json"
 	"log"
 	"strconv"
 	"strings"
@@ -222,8 +223,25 @@ func (r *RPC) GetVidaDataTransactions(startingBlock int, endingBlock int, vidaId
 		r.GetRpcNodeUrl() + "/getVidaTransactions?startingBlock=" + startingBlockStr +
 			"&endingBlock=" + endingBlockStr + "&vidaId=" + vidaIdStr,
 	)
-	var resp = parseRPCResponse(response)
-	return resp.VMDataTransaction
+
+	var resp struct {
+		Transactions []string `json:"transactions"`
+	}
+
+	if err := json.Unmarshal([]byte(response), &resp); err != nil {
+		log.Fatal("Error unmarshaling response: ", err)
+	}
+
+	var transactions []VMDataTransaction
+	for _, txStr := range resp.Transactions {
+		var tx VMDataTransaction
+		if err := json.Unmarshal([]byte(txStr), &tx); err != nil {
+			log.Fatal("Error unmarshaling transaction: ", err)
+		}
+		transactions = append(transactions, tx)
+	}
+
+	return transactions
 }
 
 func (r *RPC) GetVidaIdAddress(vidaId int) string {
