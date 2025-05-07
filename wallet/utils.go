@@ -48,7 +48,7 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 		return nil, fmt.Errorf("failed to generate key pair: %w", err)
 	}
 
-	wallet, err := FromKeys(seed, keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...)
+	wallet, err := FromKeys([]byte(mnemonic), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create wallet: %w", err)
 	}
