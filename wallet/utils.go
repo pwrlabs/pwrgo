@@ -1,32 +1,77 @@
 package wallet
 
 import (
-	"encoding/binary"
-	"errors"
+	"crypto/rand"
 	"fmt"
 	"os"
 
 	"github.com/ebfe/keccak"
 	"github.com/pwrlabs/pwrgo/encode"
 	"github.com/pwrlabs/pwrgo/rpc"
+	"github.com/tyler-smith/go-bip39"
 )
 
-// New creates a new PWRWallet with generated keys
-func New(rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	keyPair, err := encode.GenerateKeyPair(9) // 9 for Falcon-512
+// NewRandom creates a new PWRWallet with a generated mnemonic phrase
+func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	// Calculate entropy bytes based on word count
+	var entropyBytes int
+	switch wordCount {
+	case 12:
+		entropyBytes = 16 // 128 bits
+	case 15:
+		entropyBytes = 20 // 160 bits
+	case 18:
+		entropyBytes = 24 // 192 bits
+	case 21:
+		entropyBytes = 28 // 224 bits
+	case 24:
+		entropyBytes = 32 // 256 bits
+	default:
+		return nil, fmt.Errorf("invalid word count: %d", wordCount)
+	}
+
+	// Generate random entropy
+	entropy := make([]byte, entropyBytes)
+	if _, err := rand.Read(entropy); err != nil {
+		return nil, fmt.Errorf("failed to generate entropy: %w", err)
+	}
+
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+	seed := encode.GenerateSeed([]byte(mnemonic), "")
+
+	// Generate key pair from seed
+	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate key pair: %w", err)
+	}
+
+	wallet, err := FromKeys([]byte(mnemonic), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create wallet: %w", err)
+	}
+
+	return wallet, nil
+}
+
+func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	seed := encode.GenerateSeed([]byte(seedPhrase), "")
+	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
 	if err != nil {
 		return nil, err
 	}
 
 	wallet, _ := FromKeys(
-		keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
+		[]byte(seedPhrase), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
 	)
 
 	return wallet, nil
 }
 
 // FromKeys creates a wallet from existing keys
-func FromKeys(publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+func FromKeys(seedPhrase []byte, publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	// Get the hash of the public key
 	hash := hash224(publicKey)
 	address := hash[:20]
@@ -40,50 +85,30 @@ func FromKeys(publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet
 		PublicKey:  publicKey,
 		PrivateKey: privateKey,
 		Address:    address,
+		seedPhrase: seedPhrase,
 		rpc:        rpc.SetRpcNodeUrl(endpoint),
 	}, nil
 }
 
 // LoadWallet loads a wallet from a file
-func LoadWallet(filePath string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	data, err := os.ReadFile(filePath)
+func LoadWallet(path string, password string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
+	encryptedData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(data) < 8 { // At minimum we need two 4-byte length fields
-		return nil, fmt.Errorf("file too small: %d bytes", len(data))
+	seedPhraseBytes, err := encode.Decrypt(encryptedData, password)
+	if err != nil {
+		return nil, err
 	}
 
-	// Read public key length
-	pubLength := binary.BigEndian.Uint32(data[0:4])
-	if pubLength == 0 || pubLength > 2048 {
-		return nil, fmt.Errorf("invalid public key length: %d", pubLength)
+	seedPhrase := string(seedPhraseBytes)
+	wallet, err := New(seedPhrase, rpcEndpoint...)
+	if err != nil {
+		return nil, err
 	}
 
-	if 4+pubLength > uint32(len(data)) {
-		return nil, fmt.Errorf("file too small for public key of length %d", pubLength)
-	}
-
-	publicKeyBytes := data[4 : 4+pubLength]
-
-	// Read private key length
-	if 4+pubLength+4 > uint32(len(data)) {
-		return nil, errors.New("file too small for secret key length")
-	}
-
-	secLength := binary.BigEndian.Uint32(data[4+pubLength : 8+pubLength])
-	if secLength == 0 || secLength > 4096 {
-		return nil, fmt.Errorf("invalid secret key length: %d", secLength)
-	}
-
-	if 8+pubLength+secLength > uint32(len(data)) {
-		return nil, fmt.Errorf("file too small for secret key of length %d", secLength)
-	}
-
-	privateKeyBytes := data[8+pubLength : 8+pubLength+secLength]
-
-	return FromKeys(publicKeyBytes, privateKeyBytes, rpcEndpoint...)
+	return wallet, nil
 }
 
 func hash224(input []byte) []byte {

@@ -1,10 +1,8 @@
 package wallet
 
 import (
-	"encoding/binary"
 	"encoding/hex"
 	"os"
-	"path/filepath"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pwrlabs/pwrgo/encode"
@@ -60,29 +58,20 @@ func (w *PWRWallet) VerifySign(message, signature []byte) bool {
 }
 
 // StoreWallet stores the wallet to a file
-func (w *PWRWallet) StoreWallet(filePath string) error {
-	var buffer []byte
-
-	// Add public key length and data
-	pubKeyLengthBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(pubKeyLengthBytes, uint32(len(w.PublicKey)))
-	buffer = append(buffer, pubKeyLengthBytes...)
-	buffer = append(buffer, w.PublicKey...)
-
-	// Add private key length and data
-	privKeyLengthBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(privKeyLengthBytes, uint32(len(w.PrivateKey)))
-	buffer = append(buffer, privKeyLengthBytes...)
-	buffer = append(buffer, w.PrivateKey...)
-
-	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+func (w *PWRWallet) StoreWallet(filePath string, password string) error {
+	var seedPhrase []byte = w.seedPhrase
+	encryptedData, err := encode.Encrypt(seedPhrase, password)
+	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(filePath, buffer, 0600)
+	return os.WriteFile(filePath, encryptedData, 0600)
 }
 
 func (w *PWRWallet) GetRpc() *rpc.RPC {
 	return w.rpc
+}
+
+func (w *PWRWallet) GetSeedPhrase() string {
+	return string(w.seedPhrase)
 }
