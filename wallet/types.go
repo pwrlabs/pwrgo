@@ -9,4 +9,5 @@ type PWRWallet struct {
 	PrivateKey []byte
 	Address    []byte
 	rpc        *rpc.RPC
+	seedPhrase []byte
 }

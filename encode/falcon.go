@@ -156,6 +156,51 @@ func GenerateKeyPair(logN uint) (*KeyPair, error) {
 	}, nil
 }
 
+// GenerateKeyPairFromSeed generates a new Falcon key pair for the given degree (logN) using a seed
+func GenerateKeyPairFromSeed(logN uint, seed []byte) (*KeyPair, error) {
+	if logN < 1 || logN > 10 {
+		return nil, errors.New("logN must be between 1 and 10")
+	}
+
+	privKeySize := privateKeySize(logN)
+	pubKeySize := publicKeySize(logN)
+	tmpSize := tmpSizeKeygen(logN)
+
+	privKey := make([]byte, privKeySize)
+	pubKey := make([]byte, pubKeySize)
+	tmp := make([]byte, tmpSize)
+
+	// Create deterministic random and generate bytes
+	deterministicRandom := NewDeterministicSecureRandom(seed)
+	randomBytes := make([]byte, 48)
+	deterministicRandom.Read(randomBytes)
+
+	// Create new instance and generate bytes again
+	deterministicRandom = NewDeterministicSecureRandom(seed)
+	deterministicRandom.Read(randomBytes)
+
+	// Initialize PRNG with seed
+	rng := &PRNGContext{}
+	rng.InitFromSeed(randomBytes)
+
+	result := C.falcon_keygen_make(
+		&rng.ctx,
+		C.uint(logN),
+		unsafe.Pointer(&privKey[0]), C.size_t(len(privKey)),
+		unsafe.Pointer(&pubKey[0]), C.size_t(len(pubKey)),
+		unsafe.Pointer(&tmp[0]), C.size_t(len(tmp)),
+	)
+
+	if result != 0 {
+		return nil, falconError(result)
+	}
+
+	return &KeyPair{
+		PublicKey:  pubKey,
+		PrivateKey: privKey,
+	}, nil
+}
+
 // Sign generates a signature for the given message using the private key
 func Sign(message, privateKey []byte, sigType int) ([]byte, error) {
 	logN, err := GetLogN(privateKey)
@@ -248,6 +293,9 @@ func (p *PRNGContext) InitFromSystem() error {
 }
 
 func (p *PRNGContext) InitFromSeed(seed []byte) {
+	if len(seed) == 0 {
+		return
+	}
 	C.prng_init_prng_from_seed(&p.ctx, unsafe.Pointer(&seed[0]), C.size_t(len(seed)))
 }
 
