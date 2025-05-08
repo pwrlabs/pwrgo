@@ -50,17 +50,29 @@ import (
 var pwr = rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io")
 ```
 
-**Import wallet by PK:**
+**Generate a new random wallet:**
 
 ```go
-var privateKeyHex = "0xac0974bec...f80"
-var wallet = wallet.FromPrivateKey(privateKeyHex)
+wallet, _ := wallet.NewRandom(12)
+```
+
+**Import wallet by Seed Phrase:**
+
+```go
+seedPhrase := "your seed phrase here"
+wallet, _ := wallet.New(seedPhrase)
 ```
 
 **Get wallet address:**
 
 ```go
 var address = wallet.GetAddress()
+```
+
+**Get wallet seed phrase:**
+
+```go
+var seedPhrase = wallet.GetSeedPhrase()
 ```
 
 **Get wallet balance:**
@@ -72,7 +84,7 @@ var balance = wallet.GetBalance()
 **Transfer PWR tokens:**
 
 ```go
-var transferTx = wallet.TransferPWR("recipientAddress", 1000)
+wallet.TransferPWR("recipientAddress", "amount", "feePerByte")
 ```
 
 Sending a transcation to the PWR Chain returns a Response object, which specified if the transaction was a success, and returns relevant data.
@@ -86,14 +98,17 @@ import (
     "github.com/pwrlabs/pwrgo/wallet"
 )
 func main() {
-    var privateKeyHex = "0xac0974bec...f80"
-    var wallet = wallet.FromPrivateKey(privateKeyHex)
+    seedPhrase := "your seed phrase here"
+    wallet, _ := wallet.New(seedPhrase)
 
-    var transferTx = wallet.TransferPWR("recipientAddress", 1000)
-    if transferTx.Success {
-        fmt.Printf("Transfer tx hash: %s\n", transferTx.Hash)
+    amount := 1000
+    feePerByte := wallet.GetRpc().GetFeeBerByte()
+
+    response := wallet.TransferPWR("recipientAddress", amount, feePerByte)
+    if response.Success {
+        fmt.Printf("Transfer tx hash: %s\n", response.Hash)
     } else {
-        fmt.Println("Error sending Transfer tx:", transferTx.Error)
+        fmt.Println("Error sending Transfer tx:", response.Error)
     }
 }
 ```
@@ -108,15 +123,18 @@ import (
     "github.com/pwrlabs/pwrgo/wallet"
 )
 func main() {
-    var privateKeyHex = "0xac0974bec...f80"
-    var wallet = wallet.FromPrivateKey(privateKeyHex)
+    seedPhrase := "your seed phrase here"
+    wallet, _ := wallet.New(seedPhrase)
 
-    var data = []byte("Hello world")
-    var vmTxResponses = wallet.SendVMData(123, data)
-    if vmTxResponses.Success {
-        fmt.Printf("Sending tx hash: %s\n", vmTxResponses.Hash)
+    vidaId := 123
+    data := []byte("Hello world")
+    feePerByte := wallet.GetRpc().GetFeeBerByte()
+
+    response := wallet.SendVidaData(vidaId, data, feePerByte)
+    if response.Success {
+        fmt.Printf("Sending tx hash: %s\n", response.Hash)
     } else {
-        fmt.Println("Error sending VM data tx:", vmTxResponses.Error)
+        fmt.Println("Error sending VM data tx:", response.Error)
     }
 }
 ```
