@@ -556,7 +556,7 @@ func (w *PWRWallet) Withdraw(
 }
 
 func (w *PWRWallet) ClaimVidaId(
-	vidaId int64, feePerByte int,
+	vidaId int, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -565,7 +565,7 @@ func (w *PWRWallet) ClaimVidaId(
 
 	var buffer []byte
 	buffer, err := encode.ClaimVidaIdTransaction(
-		vidaId, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -580,7 +580,7 @@ func (w *PWRWallet) ClaimVidaId(
 }
 
 func (w *PWRWallet) ConduitApproval(
-	vidaId int64, wrappedTxns [][]byte, feePerByte int,
+	vidaId int, wrappedTxns [][]byte, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -589,7 +589,7 @@ func (w *PWRWallet) ConduitApproval(
 
 	var buffer []byte
 	buffer, err := encode.ConduitApprovalTransaction(
-		vidaId, wrappedTxns, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), wrappedTxns, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -603,8 +603,8 @@ func (w *PWRWallet) ConduitApproval(
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
-func (w *PWRWallet) PayableVidaData(
-	vidaId int64, data []byte, value int64, feePerByte int,
+func (w *PWRWallet) SendPayableVidaData(
+	vidaId int, data []byte, value int64, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -613,7 +613,7 @@ func (w *PWRWallet) PayableVidaData(
 
 	var buffer []byte
 	buffer, err := encode.PayableVidaDataTransaction(
-		vidaId, data, value, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), data, value, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -627,8 +627,14 @@ func (w *PWRWallet) PayableVidaData(
 	return w.rpc.BroadcastTransaction(txn_bytes)
 }
 
+func (w *PWRWallet) SendVidaData(
+	vidaId int, data []byte, feePerByte int,
+) rpc.BroadcastResponse {
+	return w.SendPayableVidaData(vidaId, data, 0, feePerByte)
+}
+
 func (w *PWRWallet) RemoveConduits(
-	vidaId int64, conduits [][]byte, feePerByte int,
+	vidaId int, conduits [][]byte, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -637,7 +643,7 @@ func (w *PWRWallet) RemoveConduits(
 
 	var buffer []byte
 	buffer, err := encode.RemoveConduitsTransaction(
-		vidaId, conduits, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), conduits, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -652,7 +658,7 @@ func (w *PWRWallet) RemoveConduits(
 }
 
 func (w *PWRWallet) SetConduitMode(
-	vidaId int64, mode byte, conduitThreshold int, conduits [][]byte,
+	vidaId int, mode byte, conduitThreshold int, conduits [][]byte,
 	conduitsWithVotingPower map[string]int64, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
@@ -662,7 +668,7 @@ func (w *PWRWallet) SetConduitMode(
 
 	var buffer []byte
 	buffer, err := encode.SetConduitModeTransaction(
-		vidaId, mode, conduitThreshold, conduits, conduitsWithVotingPower,
+		int64(vidaId), mode, conduitThreshold, conduits, conduitsWithVotingPower,
 		w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -678,7 +684,7 @@ func (w *PWRWallet) SetConduitMode(
 }
 
 func (w *PWRWallet) SetVidaPrivateState(
-	vidaId int64, privateState bool, feePerByte int,
+	vidaId int, privateState bool, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -687,7 +693,7 @@ func (w *PWRWallet) SetVidaPrivateState(
 
 	var buffer []byte
 	buffer, err := encode.SetVidaPrivateStateTransaction(
-		vidaId, privateState, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), privateState, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -702,7 +708,7 @@ func (w *PWRWallet) SetVidaPrivateState(
 }
 
 func (w *PWRWallet) SetVidaToAbsolutePublic(
-	vidaId int64, feePerByte int,
+	vidaId int, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -711,7 +717,7 @@ func (w *PWRWallet) SetVidaToAbsolutePublic(
 
 	var buffer []byte
 	buffer, err := encode.SetVidaToAbsolutePublicTransaction(
-		vidaId, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -726,7 +732,7 @@ func (w *PWRWallet) SetVidaToAbsolutePublic(
 }
 
 func (w *PWRWallet) AddVidaSponsoredAddresses(
-	vidaId int64, sponsoredAddresses []string, feePerByte int,
+	vidaId int, sponsoredAddresses []string, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -735,7 +741,7 @@ func (w *PWRWallet) AddVidaSponsoredAddresses(
 
 	var buffer []byte
 	buffer, err := encode.AddVidaSponsoredAddressesTransaction(
-		vidaId, sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -750,7 +756,7 @@ func (w *PWRWallet) AddVidaSponsoredAddresses(
 }
 
 func (w *PWRWallet) AddVidaAllowedSenders(
-	vidaId int64, allowedSenders []string, feePerByte int,
+	vidaId int, allowedSenders []string, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -759,7 +765,7 @@ func (w *PWRWallet) AddVidaAllowedSenders(
 
 	var buffer []byte
 	buffer, err := encode.AddVidaAllowedSendersTransaction(
-		vidaId, allowedSenders, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), allowedSenders, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -774,7 +780,7 @@ func (w *PWRWallet) AddVidaAllowedSenders(
 }
 
 func (w *PWRWallet) RemoveVidaAllowedSenders(
-	vidaId int64, allowedSenders []string, feePerByte int,
+	vidaId int, allowedSenders []string, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -783,7 +789,7 @@ func (w *PWRWallet) RemoveVidaAllowedSenders(
 
 	var buffer []byte
 	buffer, err := encode.RemoveVidaAllowedSendersTransaction(
-		vidaId, allowedSenders, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), allowedSenders, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -798,7 +804,7 @@ func (w *PWRWallet) RemoveVidaAllowedSenders(
 }
 
 func (w *PWRWallet) RemoveSponsoredAddresses(
-	vidaId int64, sponsoredAddresses []string, feePerByte int,
+	vidaId int, sponsoredAddresses []string, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -807,7 +813,7 @@ func (w *PWRWallet) RemoveSponsoredAddresses(
 
 	var buffer []byte
 	buffer, err := encode.RemoveSponsoredAddressesTransaction(
-		vidaId, sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -822,7 +828,7 @@ func (w *PWRWallet) RemoveSponsoredAddresses(
 }
 
 func (w *PWRWallet) SetPWRTransferRights(
-	vidaId int64, ownerCanTransferPWR bool, feePerByte int,
+	vidaId int, ownerCanTransferPWR bool, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -831,7 +837,7 @@ func (w *PWRWallet) SetPWRTransferRights(
 
 	var buffer []byte
 	buffer, err := encode.SetPWRTransferRightsTransaction(
-		vidaId, ownerCanTransferPWR, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), ownerCanTransferPWR, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
@@ -846,7 +852,7 @@ func (w *PWRWallet) SetPWRTransferRights(
 }
 
 func (w *PWRWallet) TransferPWRFromVida(
-	vidaId int64, receiver string, amount int64, feePerByte int,
+	vidaId int, receiver string, amount int64, feePerByte int,
 ) rpc.BroadcastResponse {
 	response := makeSurePublicKeyIsSet(feePerByte, w)
 	if response != nil && !response.Success {
@@ -855,7 +861,7 @@ func (w *PWRWallet) TransferPWRFromVida(
 
 	var buffer []byte
 	buffer, err := encode.TransferPWRFromVidaTransaction(
-		vidaId, receiver, amount, w.GetNonce(), w.Address, feePerByte,
+		int64(vidaId), receiver, amount, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
