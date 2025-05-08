@@ -113,7 +113,7 @@ func main() {
 }
 ```
 
-**Send data to a VM:**
+**Send data to a VIDA:**
 
 ```go
 package main
@@ -134,7 +134,7 @@ func main() {
     if response.Success {
         fmt.Printf("Sending tx hash: %s\n", response.Hash)
     } else {
-        fmt.Println("Error sending VM data tx:", response.Error)
+        fmt.Println("Error sending VIDA data tx:", response.Error)
     }
 }
 ```

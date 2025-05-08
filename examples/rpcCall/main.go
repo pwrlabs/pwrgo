@@ -1,9 +1,9 @@
 package main
 
 import (
-    "fmt"
-    "encoding/json"
     "encoding/hex"
+    "encoding/json"
+    "fmt"
 
     "github.com/pwrlabs/pwrgo/rpc"
 )
@@ -11,10 +11,10 @@ import (
 var pwr = rpc.SetRpcNodeUrl("https://pwrrpc.pwrlabs.io")
 
 // Handler for incoming messages
-func messageHandler(transaction rpc.VMDataTransaction) {
+func messageHandler(transaction rpc.VidaDataTransaction) {
     sender := transaction.Sender
     data := transaction.Data
-    
+
     dataBytes, _ := hex.DecodeString(data)
     var obj map[string]interface{}
 
@@ -44,7 +44,7 @@ func Vidas() {
 
     fmt.Println("Latest checked blocked:", subscription.GetLatestCheckedBlock())
 
-    if (subscription.IsRunning()) {
+    if subscription.IsRunning() {
         fmt.Println("Press Enter to exit...")
         fmt.Scanln()
     }
@@ -56,7 +56,7 @@ func RpcCall() {
 
     // var delegators = pwr.GetDelegatorsOfValidator("0x0EA54532D7CA460083E547910D5C30C5896967C9")
     // fmt.Println("Delegators:", delegators)
-    
+
     var blocksCount = pwr.GetBlocksCount()
     fmt.Println("Blocks count:", blocksCount)
 
@@ -73,7 +73,7 @@ func RpcCall() {
     var endBlock = 1179
     var vmId = 1234
     var transactions = pwr.GetVidaDataTransactions(startBlcok, endBlock, vmId)
-    fmt.Println("VM Data:", transactions)
+    fmt.Println("VIDA Data:", transactions)
 
     // var guardian = pwr.GetGuardianOfAddress("0xD97C25C0842704588DD70A061C09A522699E2B9C")
     // fmt.Println("Guardian:", guardian)

@@ -215,7 +215,7 @@ func (r *RPC) GetVidaIdClaimingFee() int {
 	return resp.VmIdClaimingFee
 }
 
-func (r *RPC) GetVidaDataTransactions(startingBlock int, endingBlock int, vidaId int) []VMDataTransaction {
+func (r *RPC) GetVidaDataTransactions(startingBlock int, endingBlock int, vidaId int) []VidaDataTransaction {
 	startingBlockStr := strconv.Itoa(startingBlock)
 	endingBlockStr := strconv.Itoa(endingBlock)
 	vidaIdStr := strconv.Itoa(vidaId)
@@ -232,9 +232,9 @@ func (r *RPC) GetVidaDataTransactions(startingBlock int, endingBlock int, vidaId
 		log.Fatal("Error unmarshaling response: ", err)
 	}
 
-	var transactions []VMDataTransaction
+	var transactions []VidaDataTransaction
 	for _, txStr := range resp.Transactions {
-		var tx VMDataTransaction
+		var tx VidaDataTransaction
 		if err := json.Unmarshal([]byte(txStr), &tx); err != nil {
 			log.Fatal("Error unmarshaling transaction: ", err)
 		}
