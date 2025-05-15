@@ -90,7 +90,7 @@ func RpcCall() {
     var totalValidatorsCount = pwr.GetValidatorsCount()
     fmt.Println("TotalValidatorsCount:", totalValidatorsCount)
 
-    var tx = pwr.GetTransactionByHash("0x0075C4D04BC18586CF6F6ECE8783E922F4AAC8D58C71D429848AD637F2DAC33A")
+    var tx = pwr.GetTransactionByHash("0x661819fb7e66281d1d397ddd9d26bdca250540bf5bb608f70fd4cb3577091115")
     fmt.Println("Transfer TX: ", tx)
 }
 

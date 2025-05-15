@@ -1,14 +1,14 @@
 package wallet
 
 import (
-	"crypto/rand"
+	// "encoding/hex"
+	"encoding/hex"
 	"fmt"
 	"os"
 
 	"github.com/ebfe/keccak"
 	"github.com/pwrlabs/pwrgo/encode"
 	"github.com/pwrlabs/pwrgo/rpc"
-	"github.com/tyler-smith/go-bip39"
 )
 
 // NewRandom creates a new PWRWallet with a generated mnemonic phrase
@@ -29,26 +29,14 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	default:
 		return nil, fmt.Errorf("invalid word count: %d", wordCount)
 	}
+	_ = entropyBytes
 
-	// Generate random entropy
-	entropy := make([]byte, entropyBytes)
-	if _, err := rand.Read(entropy); err != nil {
-		return nil, fmt.Errorf("failed to generate entropy: %w", err)
-	}
+	publicKey, secretKey, seedPhrase := generateRandomKeypair(wordCount)
 
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
-	}
-	seed := encode.GenerateSeed([]byte(mnemonic), "")
+	publicKeyBytes, _ := hex.DecodeString(publicKey)
+	secretKeyBytes, _ := hex.DecodeString(secretKey)
 
-	// Generate key pair from seed
-	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate key pair: %w", err)
-	}
-
-	wallet, err := FromKeys([]byte(mnemonic), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...)
+	wallet, err := FromKeys([]byte(seedPhrase), publicKeyBytes, secretKeyBytes, rpcEndpoint...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create wallet: %w", err)
 	}
@@ -57,14 +45,13 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 }
 
 func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	seed := encode.GenerateSeed([]byte(seedPhrase), "")
-	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
-	if err != nil {
-		return nil, err
-	}
+	publicKey, secretKey := generateKeypair(seedPhrase)
 
+	publicKeyBytes, _ := hex.DecodeString(publicKey)
+	secretKeyBytes, _ := hex.DecodeString(secretKey)
+	
 	wallet, _ := FromKeys(
-		[]byte(seedPhrase), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
+		[]byte(seedPhrase), publicKeyBytes, secretKeyBytes, rpcEndpoint...,
 	)
 
 	return wallet, nil
@@ -73,7 +60,7 @@ func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 // FromKeys creates a wallet from existing keys
 func FromKeys(seedPhrase []byte, publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	// Get the hash of the public key
-	hash := hash224(publicKey)
+	hash := hash224(publicKey[1:])
 	address := hash[:20]
 
 	endpoint := "https://pwrrpc.pwrlabs.io"
