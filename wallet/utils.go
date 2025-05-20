@@ -1,19 +1,18 @@
 package wallet
 
 import (
-	// "encoding/hex"
-	"encoding/hex"
+	"crypto/rand"
 	"fmt"
 	"os"
 
 	"github.com/ebfe/keccak"
 	"github.com/pwrlabs/pwrgo/encode"
 	"github.com/pwrlabs/pwrgo/rpc"
+	"github.com/tyler-smith/go-bip39"
 )
 
 // NewRandom creates a new PWRWallet with a generated mnemonic phrase
 func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	// Calculate entropy bytes based on word count
 	var entropyBytes int
 	switch wordCount {
 	case 12:
@@ -29,14 +28,26 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	default:
 		return nil, fmt.Errorf("invalid word count: %d", wordCount)
 	}
-	_ = entropyBytes
 
-	publicKey, secretKey, seedPhrase := generateRandomKeypair(wordCount)
+	// Generate random entropy
+	entropy := make([]byte, entropyBytes)
+	if _, err := rand.Read(entropy); err != nil {
+		return nil, fmt.Errorf("failed to generate entropy: %w", err)
+	}
 
-	publicKeyBytes, _ := hex.DecodeString(publicKey)
-	secretKeyBytes, _ := hex.DecodeString(secretKey)
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+	seed := encode.GenerateSeed([]byte(mnemonic), "")
 
-	wallet, err := FromKeys([]byte(seedPhrase), publicKeyBytes, secretKeyBytes, rpcEndpoint...)
+	// Generate key pair from seed
+	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate key pair: %w", err)
+	}
+
+	wallet, err := FromKeys([]byte(mnemonic), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create wallet: %w", err)
 	}
@@ -45,13 +56,14 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 }
 
 func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	publicKey, secretKey := generateKeypair(seedPhrase)
+	seed := encode.GenerateSeed([]byte(seedPhrase), "")
+	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
+	if err != nil {
+		return nil, err
+	}
 
-	publicKeyBytes, _ := hex.DecodeString(publicKey)
-	secretKeyBytes, _ := hex.DecodeString(secretKey)
-	
 	wallet, _ := FromKeys(
-		[]byte(seedPhrase), publicKeyBytes, secretKeyBytes, rpcEndpoint...,
+		[]byte(seedPhrase), keyPair.PublicKey, keyPair.PrivateKey, rpcEndpoint...,
 	)
 
 	return wallet, nil
