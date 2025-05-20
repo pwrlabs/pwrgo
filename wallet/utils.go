@@ -13,7 +13,6 @@ import (
 
 // NewRandom creates a new PWRWallet with a generated mnemonic phrase
 func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	// Calculate entropy bytes based on word count
 	var entropyBytes int
 	switch wordCount {
 	case 12:
@@ -73,7 +72,7 @@ func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 // FromKeys creates a wallet from existing keys
 func FromKeys(seedPhrase []byte, publicKey, privateKey []byte, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	// Get the hash of the public key
-	hash := hash224(publicKey)
+	hash := hash224(publicKey[1:])
 	address := hash[:20]
 
 	endpoint := "https://pwrrpc.pwrlabs.io"

@@ -181,7 +181,10 @@ func GenerateKeyPairFromSeed(logN uint, seed []byte) (*KeyPair, error) {
 
 	// Initialize PRNG with seed
 	rng := &PRNGContext{}
-	rng.InitFromSeed(randomBytes)
+
+	rng.Init()
+	rng.Inject(randomBytes)
+	rng.Flip()
 
 	result := C.falcon_keygen_make(
 		&rng.ctx,
