@@ -25,16 +25,21 @@ type Transaction struct {
     Data               string `json:"data"`
 }
 
+type TransactionBlock struct {
+    Identifier      int    `json:"identifier"`
+    TransactionHash string `json:"transactionHash"`
+}
+
 type Block struct {
-    BlockNumber      int           `json:"blockNumber"`
-    BlockReward      int           `json:"blockReward"`
-    TransactionCount int           `json:"transactionCount"`
-    BlockSize        int           `json:"blockSize"`
-    Timestamp        int           `json:"timestamp"`
-    Success          bool          `json:"success"`
-    BlockHash        string        `json:"blockHash"`
-    BlockSubmitter   string        `json:"blockSubmitter"`
-    Transactions     []Transaction `json:"transactions"`
+    BlockNumber      int                `json:"blockNumber"`
+    BlockReward      int                `json:"blockReward"`
+    TransactionCount int                `json:"transactionCount"`
+    BlockSize        int                `json:"blockSize"`
+    Timestamp        int                `json:"timestamp"`
+    Success          bool               `json:"success"`
+    BlockHash        string             `json:"blockHash"`
+    BlockSubmitter   string             `json:"blockSubmitter"`
+    Transactions     []TransactionBlock `json:"transactions"`
 }
 
 type RPCResponse struct {
