@@ -16,8 +16,10 @@ func main() {
 	fmt.Println("Nonce:", wallet.GetNonce())
 	fmt.Println("Balance:", wallet.GetBalance())
 
+    feePerByte := wallet.GetRpc().GetFeePerByte()
+
 	var tx rpc.BroadcastResponse
-	tx = wallet.TransferPWR("0x2bf2ff7d9ace8aef8a21726242e7e2d323f0d5d5", 1, wallet.GetRpc().GetFeeBerByte())
+	tx = wallet.TransferPWR("0x2bf2ff7d9ace8aef8a21726242e7e2d323f0d5d5", 1, feePerByte)
 	if tx.Success {
 		fmt.Println("Transfer tx hash:", tx.Hash)
 	} else {
@@ -26,7 +28,6 @@ func main() {
 
 	vidaId := 123
     data := []byte("Hello world")
-    feePerByte := wallet.GetRpc().GetFeeBerByte()
 
     tx = wallet.SendVidaData(vidaId, data, feePerByte)
     if tx.Success {
