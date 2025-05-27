@@ -350,7 +350,7 @@ func (r *RPC) GetDelegatorsOfValidator(validatorAddress string) []Delegator {
 	return delegators
 }
 
-func (r *RPC) GetFeeBerByte() int {
+func (r *RPC) GetFeePerByte() int {
 	var response = get(r.GetRpcNodeUrl() + "/feePerByte")
 	var resp = parseRPCResponse(response)
 	return resp.FeePerByte

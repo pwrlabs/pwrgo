@@ -6,3 +6,5 @@
 # local env files
 .env*.local
 .env
+
+example_wallet.dat

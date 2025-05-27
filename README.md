@@ -102,7 +102,7 @@ func main() {
     wallet, _ := wallet.New(seedPhrase)
 
     amount := 1000
-    feePerByte := wallet.GetRpc().GetFeeBerByte()
+    feePerByte := wallet.GetRpc().GetFeePerByte()
 
     response := wallet.TransferPWR("recipientAddress", amount, feePerByte)
     if response.Success {
@@ -128,7 +128,7 @@ func main() {
 
     vidaId := 123
     data := []byte("Hello world")
-    feePerByte := wallet.GetRpc().GetFeeBerByte()
+    feePerByte := wallet.GetRpc().GetFeePerByte()
 
     response := wallet.SendVidaData(vidaId, data, feePerByte)
     if response.Success {
@@ -154,7 +154,7 @@ var url = pwr.GetRpcNodeUrl()
 Gets the latest fee-per-byte rate.
 
 ```go
-var fee = pwr.GetFeeBerByte()
+var fee = pwr.GetFeePerByte()
 ```
 
 **Get Balance Of Address:**
