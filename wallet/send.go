@@ -3,13 +3,13 @@ package wallet
 import (
 	"log"
 
-	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/config/transactions"
 	"github.com/pwrlabs/pwrgo/rpc"
 )
 
 func (w *PWRWallet) SetPublicKey(publicKey []byte, feePerByte int) rpc.BroadcastResponse {
 	var buffer []byte
-	buffer, err := encode.SetPublicKeyBytes(publicKey, w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.SetPublicKeyBytes(publicKey, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -29,7 +29,7 @@ func (w *PWRWallet) JoinAsValidator(ip string, feePerByte int) rpc.BroadcastResp
 	}
 
 	var buffer []byte
-	buffer, err := encode.JoinAsValidatorBytes(ip, w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.JoinAsValidatorBytes(ip, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -49,7 +49,7 @@ func (w *PWRWallet) Delegate(to string, amount int, feePerByte int) rpc.Broadcas
 	}
 
 	var buffer []byte
-	buffer, err := encode.DelegateTxBytes(to, amount, w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.DelegateTxBytes(to, amount, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -69,7 +69,7 @@ func (w *PWRWallet) ChangeIp(newIp string, feePerByte int) rpc.BroadcastResponse
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeIpBytes(newIp, w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.ChangeIpBytes(newIp, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -89,7 +89,7 @@ func (w *PWRWallet) ClaimActiveNodeSpot(feePerByte int) rpc.BroadcastResponse {
 	}
 
 	var buffer []byte
-	buffer, err := encode.ClaimActiveNodeSpotBytes(w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.ClaimActiveNodeSpotBytes(w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -113,7 +113,7 @@ func (w *PWRWallet) TransferPWR(to string, amount int, feePerByte int) rpc.Broad
 	}
 
 	var buffer []byte
-	buffer, err := encode.TransferTxBytes(amount, to, w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.TransferTxBytes(amount, to, w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -136,7 +136,7 @@ func (w *PWRWallet) ProposeChangeEarlyWithdrawPenalty(
 	}
 
 	var buffer []byte
-	buffer, err := encode.EarlyWithdrawPenaltyProposal(
+	buffer, err := transactions.EarlyWithdrawPenaltyProposal(
 		title, description, withdraw_penalty_time, withdraw_penalty, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -160,7 +160,7 @@ func (w *PWRWallet) ProposeChangeFeePerByte(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeFeePerByteProposalTx(
+	buffer, err := transactions.ChangeFeePerByteProposalTx(
 		title, description, feePerByte, w.GetNonce(), w.Address, _feePerByte,
 	)
 	if err != nil {
@@ -184,7 +184,7 @@ func (w *PWRWallet) ProposeChangeMaxBlockSize(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeMaxBlockSizeProposalTx(
+	buffer, err := transactions.ChangeMaxBlockSizeProposalTx(
 		title, description, maxBlockSize, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -208,7 +208,7 @@ func (w *PWRWallet) ProposeChangeMaxTxnSize(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeMaxTxnSizeProposalTx(
+	buffer, err := transactions.ChangeMaxTxnSizeProposalTx(
 		title, description, maxTxnSize, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -232,7 +232,7 @@ func (w *PWRWallet) ProposeChangeOverallBurnPercentage(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeOverallBurnPercentageProposalTx(
+	buffer, err := transactions.ChangeOverallBurnPercentageProposalTx(
 		title, description, burnPercentage, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -256,7 +256,7 @@ func (w *PWRWallet) ProposeChangeRewardPerYear(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeRewardPerYearProposalTx(
+	buffer, err := transactions.ChangeRewardPerYearProposalTx(
 		title, description, rewardPerYear, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -280,7 +280,7 @@ func (w *PWRWallet) ProposeChangeValidatorCountLimit(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeValidatorCountLimitProposalTx(
+	buffer, err := transactions.ChangeValidatorCountLimitProposalTx(
 		title, description, validatorCountLimit, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -304,7 +304,7 @@ func (w *PWRWallet) ProposeChangeValidatorJoiningFee(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeValidatorJoiningFeeProposalTx(
+	buffer, err := transactions.ChangeValidatorJoiningFeeProposalTx(
 		title, description, joiningFee, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -328,7 +328,7 @@ func (w *PWRWallet) ProposeChangeVidaIdClaimingFee(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeVidaIdClaimingFeeProposalTx(
+	buffer, err := transactions.ChangeVidaIdClaimingFeeProposalTx(
 		title, description, vidaIdClaimingFee, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -352,7 +352,7 @@ func (w *PWRWallet) ProposeChangeVmOwnerTxnFeeShare(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ChangeVmOwnerTxnFeeShareProposalTx(
+	buffer, err := transactions.ChangeVmOwnerTxnFeeShareProposalTx(
 		title, description, vmOwnerTxnFeeShare, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -376,7 +376,7 @@ func (w *PWRWallet) ProposeOther(
 	}
 
 	var buffer []byte
-	buffer, err := encode.OtherProposalTx(
+	buffer, err := transactions.OtherProposalTx(
 		title, description, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -400,7 +400,7 @@ func (w *PWRWallet) VoteOnProposal(
 	}
 
 	var buffer []byte
-	buffer, err := encode.VoteOnProposalTx(
+	buffer, err := transactions.VoteOnProposalTx(
 		proposalHash, vote, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -424,7 +424,7 @@ func (w *PWRWallet) GuardianApproval(
 	}
 
 	var buffer []byte
-	buffer, err := encode.GuardianApprovalTransaction(
+	buffer, err := transactions.GuardianApprovalTransaction(
 		wrappedTxns, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -446,7 +446,7 @@ func (w *PWRWallet) RemoveGuardian(feePerByte int) rpc.BroadcastResponse {
 	}
 
 	var buffer []byte
-	buffer, err := encode.RemoveGuardianTransaction(w.GetNonce(), w.Address, feePerByte)
+	buffer, err := transactions.RemoveGuardianTransaction(w.GetNonce(), w.Address, feePerByte)
 	if err != nil {
 		log.Fatal("Failed to get tx bytes: ", err.Error())
 	}
@@ -468,7 +468,7 @@ func (w *PWRWallet) SetGuardian(
 	}
 
 	var buffer []byte
-	buffer, err := encode.SetGuardianTransaction(
+	buffer, err := transactions.SetGuardianTransaction(
 		expiryDate, guardianAddress, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -492,7 +492,7 @@ func (w *PWRWallet) MoveStake(
 	}
 
 	var buffer []byte
-	buffer, err := encode.MoveStakeTransaction(
+	buffer, err := transactions.MoveStakeTransaction(
 		sharesAmount, fromValidator, toValidator, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -516,7 +516,7 @@ func (w *PWRWallet) RemoveValidator(
 	}
 
 	var buffer []byte
-	buffer, err := encode.RemoveValidatorTransaction(
+	buffer, err := transactions.RemoveValidatorTransaction(
 		validatorAddress, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -540,7 +540,7 @@ func (w *PWRWallet) Withdraw(
 	}
 
 	var buffer []byte
-	buffer, err := encode.WithdrawTransaction(
+	buffer, err := transactions.WithdrawTransaction(
 		sharesAmount, validator, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -564,7 +564,7 @@ func (w *PWRWallet) ClaimVidaId(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ClaimVidaIdTransaction(
+	buffer, err := transactions.ClaimVidaIdTransaction(
 		int64(vidaId), w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -588,7 +588,7 @@ func (w *PWRWallet) ConduitApproval(
 	}
 
 	var buffer []byte
-	buffer, err := encode.ConduitApprovalTransaction(
+	buffer, err := transactions.ConduitApprovalTransaction(
 		int64(vidaId), wrappedTxns, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -612,7 +612,7 @@ func (w *PWRWallet) SendPayableVidaData(
 	}
 
 	var buffer []byte
-	buffer, err := encode.PayableVidaDataTransaction(
+	buffer, err := transactions.PayableVidaDataTransaction(
 		int64(vidaId), data, value, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -642,7 +642,7 @@ func (w *PWRWallet) RemoveConduits(
 	}
 
 	var buffer []byte
-	buffer, err := encode.RemoveConduitsTransaction(
+	buffer, err := transactions.RemoveConduitsTransaction(
 		int64(vidaId), conduits, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -667,7 +667,7 @@ func (w *PWRWallet) SetConduitMode(
 	}
 
 	var buffer []byte
-	buffer, err := encode.SetConduitModeTransaction(
+	buffer, err := transactions.SetConduitModeTransaction(
 		int64(vidaId), mode, conduitThreshold, conduits, conduitsWithVotingPower,
 		w.GetNonce(), w.Address, feePerByte,
 	)
@@ -692,7 +692,7 @@ func (w *PWRWallet) SetVidaPrivateState(
 	}
 
 	var buffer []byte
-	buffer, err := encode.SetVidaPrivateStateTransaction(
+	buffer, err := transactions.SetVidaPrivateStateTransaction(
 		int64(vidaId), privateState, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -716,7 +716,7 @@ func (w *PWRWallet) SetVidaToAbsolutePublic(
 	}
 
 	var buffer []byte
-	buffer, err := encode.SetVidaToAbsolutePublicTransaction(
+	buffer, err := transactions.SetVidaToAbsolutePublicTransaction(
 		int64(vidaId), w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -740,7 +740,7 @@ func (w *PWRWallet) AddVidaSponsoredAddresses(
 	}
 
 	var buffer []byte
-	buffer, err := encode.AddVidaSponsoredAddressesTransaction(
+	buffer, err := transactions.AddVidaSponsoredAddressesTransaction(
 		int64(vidaId), sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -764,7 +764,7 @@ func (w *PWRWallet) AddVidaAllowedSenders(
 	}
 
 	var buffer []byte
-	buffer, err := encode.AddVidaAllowedSendersTransaction(
+	buffer, err := transactions.AddVidaAllowedSendersTransaction(
 		int64(vidaId), allowedSenders, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -788,7 +788,7 @@ func (w *PWRWallet) RemoveVidaAllowedSenders(
 	}
 
 	var buffer []byte
-	buffer, err := encode.RemoveVidaAllowedSendersTransaction(
+	buffer, err := transactions.RemoveVidaAllowedSendersTransaction(
 		int64(vidaId), allowedSenders, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -812,7 +812,7 @@ func (w *PWRWallet) RemoveSponsoredAddresses(
 	}
 
 	var buffer []byte
-	buffer, err := encode.RemoveSponsoredAddressesTransaction(
+	buffer, err := transactions.RemoveSponsoredAddressesTransaction(
 		int64(vidaId), sponsoredAddresses, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -836,7 +836,7 @@ func (w *PWRWallet) SetPWRTransferRights(
 	}
 
 	var buffer []byte
-	buffer, err := encode.SetPWRTransferRightsTransaction(
+	buffer, err := transactions.SetPWRTransferRightsTransaction(
 		int64(vidaId), ownerCanTransferPWR, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
@@ -860,7 +860,7 @@ func (w *PWRWallet) TransferPWRFromVida(
 	}
 
 	var buffer []byte
-	buffer, err := encode.TransferPWRFromVidaTransaction(
+	buffer, err := transactions.TransferPWRFromVidaTransaction(
 		int64(vidaId), receiver, amount, w.GetNonce(), w.Address, feePerByte,
 	)
 	if err != nil {
