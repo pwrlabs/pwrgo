@@ -1,4 +1,4 @@
-package encode
+package transactions
 
 import (
 	"encoding/hex"

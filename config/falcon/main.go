@@ -1,6 +1,4 @@
-// internal/falcon/falcon.go
-
-package encode
+package falcon
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/../c
@@ -47,6 +45,8 @@ import (
 	"errors"
 	"fmt"
 	"unsafe"
+
+	"github.com/pwrlabs/pwrgo/config/deterministic"
 )
 
 // Error codes from Falcon
@@ -171,12 +171,12 @@ func GenerateKeyPairFromSeed(logN uint, seed []byte) (*KeyPair, error) {
 	tmp := make([]byte, tmpSize)
 
 	// Create deterministic random and generate bytes
-	deterministicRandom := NewDeterministicSecureRandom(seed)
+	deterministicRandom := deterministic.NewDeterministicSecureRandom(seed)
 	randomBytes := make([]byte, 48)
 	deterministicRandom.Read(randomBytes)
 
 	// Create new instance and generate bytes again
-	deterministicRandom = NewDeterministicSecureRandom(seed)
+	deterministicRandom = deterministic.NewDeterministicSecureRandom(seed)
 	deterministicRandom.Read(randomBytes)
 
 	// Initialize PRNG with seed

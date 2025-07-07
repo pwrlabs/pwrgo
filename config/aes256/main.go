@@ -1,17 +1,18 @@
-package encode
+package aes256
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+
 	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
 	iterationCount = 65536
-	keyLength     = 32 // 256 bits
-	salt          = "your-salt-value"
+	keyLength      = 32 // 256 bits
+	salt           = "your-salt-value"
 )
 
 func generateKey(password string) []byte {
@@ -28,7 +29,7 @@ func generateIV() ([]byte, error) {
 
 func Encrypt(data []byte, password string) ([]byte, error) {
 	key := generateKey(password)
-	
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

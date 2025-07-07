@@ -1,9 +1,12 @@
-package encode
+package deterministic
 
 import (
 	"crypto/sha256"
 	"encoding/binary"
 	"hash"
+	"crypto/sha512"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
 // DeterministicSecureRandom implements io.Reader to provide deterministic random bytes
@@ -51,6 +54,18 @@ func (d *DeterministicSecureRandom) Read(p []byte) (n int, err error) {
 	}
 
 	return len(p), nil
+}
+
+// GenerateSeed generates a seed from a mnemonic phrase using PBKDF2
+func GenerateSeed(mnemonic []byte, passphrase string) []byte {
+	// Use PBKDF2 with SHA512 to generate the seed
+	// Parameters:
+	// - mnemonic as the password
+	// - "mnemonic" + passphrase as the salt
+	// - 2048 iterations
+	// - 64 bytes output (512 bits)
+	salt := append([]byte("mnemonic"), []byte(passphrase)...)
+	return pbkdf2.Key(mnemonic, salt, 2048, 64, sha512.New)
 }
 
 // min returns the minimum of two integers

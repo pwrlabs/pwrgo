@@ -1,4 +1,4 @@
-package encode
+package transactions
 
 func txnBaseBytes(txIdentifier int, nonce int, address []byte, feePerByte int) ([]byte, error) {
 	identifierByte := DecToBytes(txIdentifier, 4)

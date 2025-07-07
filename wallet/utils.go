@@ -6,7 +6,9 @@ import (
 	"os"
 
 	"github.com/ebfe/keccak"
-	"github.com/pwrlabs/pwrgo/encode"
+	"github.com/pwrlabs/pwrgo/config/falcon"
+	"github.com/pwrlabs/pwrgo/config/aes256"
+	"github.com/pwrlabs/pwrgo/config/deterministic"
 	"github.com/pwrlabs/pwrgo/rpc"
 	"github.com/tyler-smith/go-bip39"
 )
@@ -39,10 +41,10 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate mnemonic: %w", err)
 	}
-	seed := encode.GenerateSeed([]byte(mnemonic), "")
+	seed := deterministic.GenerateSeed([]byte(mnemonic), "")
 
 	// Generate key pair from seed
-	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
+	keyPair, err := falcon.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate key pair: %w", err)
 	}
@@ -56,8 +58,8 @@ func NewRandom(wordCount int, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
 }
 
 func New(seedPhrase string, rpcEndpoint ...*rpc.RPC) (*PWRWallet, error) {
-	seed := encode.GenerateSeed([]byte(seedPhrase), "")
-	keyPair, err := encode.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
+	seed := deterministic.GenerateSeed([]byte(seedPhrase), "")
+	keyPair, err := falcon.GenerateKeyPairFromSeed(9, seed) // 9 for Falcon-512
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +98,7 @@ func LoadWallet(path string, password string, rpcEndpoint ...*rpc.RPC) (*PWRWall
 		return nil, err
 	}
 
-	seedPhraseBytes, err := encode.Decrypt(encryptedData, password)
+	seedPhraseBytes, err := aes256.Decrypt(encryptedData, password)
 	if err != nil {
 		return nil, err
 	}
