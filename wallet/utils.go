@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/ebfe/keccak"
-	"github.com/pwrlabs/pwrgo/config/falcon"
+	"github.com/keep-pwr-strong/falcon-go/falcon"
 	"github.com/pwrlabs/pwrgo/config/aes256"
 	"github.com/pwrlabs/pwrgo/config/deterministic"
 	"github.com/pwrlabs/pwrgo/rpc"

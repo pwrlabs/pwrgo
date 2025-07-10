@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/pwrlabs/pwrgo/config/falcon"
+	"github.com/keep-pwr-strong/falcon-go/falcon"
 	"github.com/pwrlabs/pwrgo/config/aes256"
 	"github.com/pwrlabs/pwrgo/config/transactions"
 	"github.com/pwrlabs/pwrgo/rpc"
