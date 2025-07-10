@@ -7,6 +7,7 @@ toolchain go1.23.7
 require (
 	github.com/ebfe/keccak v0.0.0-20150115210727-5cc570678d1b
 	github.com/ethereum/go-ethereum v1.13.4
+	github.com/keep-pwr-strong/falcon-go v1.0.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	go.etcd.io/bbolt v1.4.2
 	golang.org/x/crypto v0.35.0
