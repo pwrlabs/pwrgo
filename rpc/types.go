@@ -8,6 +8,9 @@ type RPC struct {
 
 type ProcessVidaTransactions func(transaction VidaDataTransaction)
 
+// BlockSaver is a function type for saving the latest checked block number to persistent storage
+type BlockSaver func(blockNumber int) error
+
 type Transaction struct {
     ActionFee          int    `json:"actionFee"`
     Fee                int    `json:"fee"`
