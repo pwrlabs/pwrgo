@@ -3,6 +3,7 @@ package pwrnosqldb
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/sha3"
+	"github.com/pwrlabs/pwrgo/config/aes256"
 )
 
 // PowerKvError represents errors from PowerKv operations
@@ -70,7 +74,7 @@ func NewPowerKv(projectID, secret string) (*PowerKv, error) {
 
 	return &PowerKv{
 		client:    client,
-		serverURL: "https://pwrnosqlvida.pwrlabs.io/",
+		serverURL: "https://powerkvbe.pwrlabs.io",
 		projectID: projectID,
 		secret:    secret,
 	}, nil
@@ -131,6 +135,66 @@ func (p *PowerKv) toBytes(data interface{}) ([]byte, error) {
 	}
 }
 
+// hash256 performs Keccak256 hash (PWRHash)
+func (p *PowerKv) hash256(input []byte) []byte {
+    if input == nil {
+        panic("Input is null") // or return error
+    }
+    hasher := sha3.NewLegacyKeccak256()
+    hasher.Write(input)
+    return hasher.Sum(nil)
+}
+
+// packData packs key and data into binary format (ByteBuffer equivalent)
+func (p *PowerKv) packData(key, data []byte) []byte {
+	var buf bytes.Buffer
+
+	// Write key length (4 bytes, big-endian) + key bytes
+	binary.Write(&buf, binary.BigEndian, uint32(len(key)))
+	buf.Write(key)
+
+	// Write data length (4 bytes, big-endian) + data bytes
+	binary.Write(&buf, binary.BigEndian, uint32(len(data)))
+	buf.Write(data)
+
+	return buf.Bytes()
+}
+
+// unpackData unpacks binary data to get original key and data
+func (p *PowerKv) unpackData(packedBuffer []byte) ([]byte, []byte, error) {
+	if len(packedBuffer) < 8 {
+		return nil, nil, NewPowerKvError("InvalidInput", "Buffer too small for unpacking")
+	}
+
+	buf := bytes.NewReader(packedBuffer)
+
+	// Read key length (4 bytes, big-endian)
+	var keyLength uint32
+	if err := binary.Read(buf, binary.BigEndian, &keyLength); err != nil {
+		return nil, nil, NewPowerKvError("InvalidInput", fmt.Sprintf("Failed to read key length: %v", err))
+	}
+
+	// Read key bytes
+	key := make([]byte, keyLength)
+	if _, err := buf.Read(key); err != nil {
+		return nil, nil, NewPowerKvError("InvalidInput", fmt.Sprintf("Failed to read key: %v", err))
+	}
+
+	// Read data length (4 bytes, big-endian)
+	var dataLength uint32
+	if err := binary.Read(buf, binary.BigEndian, &dataLength); err != nil {
+		return nil, nil, NewPowerKvError("InvalidInput", fmt.Sprintf("Failed to read data length: %v", err))
+	}
+
+	// Read data bytes
+	data := make([]byte, dataLength)
+	if _, err := buf.Read(data); err != nil {
+		return nil, nil, NewPowerKvError("InvalidInput", fmt.Sprintf("Failed to read data: %v", err))
+	}
+
+	return key, data, nil
+}
+
 // Put stores data with the given key
 func (p *PowerKv) Put(key, data interface{}) (bool, error) {
 	keyBytes, err := p.toBytes(key)
@@ -148,13 +212,25 @@ func (p *PowerKv) Put(key, data interface{}) (bool, error) {
 
 // PutBytes stores byte data with byte key
 func (p *PowerKv) PutBytes(key, data []byte) (bool, error) {
+	// Hash the key with Keccak256
+	keyHash := p.hash256(key)
+
+	// Pack the original key and data
+	packedData := p.packData(key, data)
+
+	// Encrypt the packed data
+	encryptedData, err := aes256.Encrypt(packedData, p.secret)
+	if err != nil {
+		return false, NewPowerKvError("ServerError", fmt.Sprintf("Encryption failed: %v", err))
+	}
+
 	url := p.serverURL + "/storeData"
 
 	payload := StoreDataRequest{
 		ProjectID: p.projectID,
 		Secret:    p.secret,
-		Key:       p.toHexString(key),
-		Value:     p.toHexString(data),
+		Key:       p.toHexString(keyHash),
+		Value:     p.toHexString(encryptedData),
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -186,16 +262,7 @@ func (p *PowerKv) PutBytes(key, data []byte) (bool, error) {
 		return true, nil
 	}
 
-	// Parse error message
-	var errorResp ErrorResponse
-	message := fmt.Sprintf("HTTP %d", resp.StatusCode)
-	if err := json.Unmarshal(responseBody, &errorResp); err == nil && errorResp.Message != "" {
-		message = errorResp.Message
-	} else if len(responseBody) > 0 {
-		message = fmt.Sprintf("HTTP %d — %s", resp.StatusCode, string(responseBody))
-	}
-
-	return false, NewPowerKvError("ServerError", fmt.Sprintf("storeData failed: %s", message))
+	return false, NewPowerKvError("ServerError", fmt.Sprintf("storeData failed: %d - %s", resp.StatusCode, string(responseBody)))
 }
 
 // GetValue retrieves data for the given key
@@ -210,7 +277,9 @@ func (p *PowerKv) GetValue(key interface{}) ([]byte, error) {
 
 // GetValueBytes retrieves data for the given byte key
 func (p *PowerKv) GetValueBytes(key []byte) ([]byte, error) {
-	keyHex := p.toHexString(key)
+	// Hash the key with Keccak256
+	keyHash := p.hash256(key)
+	keyHex := p.toHexString(keyHash)
 	baseURL := p.serverURL + "/getValue"
 
 	params := url.Values{}
@@ -244,7 +313,30 @@ func (p *PowerKv) GetValueBytes(key []byte) ([]byte, error) {
 			return nil, NewPowerKvError("ServerError", fmt.Sprintf("Unexpected response shape from /getValue: %s", string(responseBody)))
 		}
 
-		return p.fromHexString(response.Value)
+		// Handle both with/without 0x prefix
+		cleanHex := response.Value
+		if strings.HasPrefix(cleanHex, "0x") || strings.HasPrefix(cleanHex, "0X") {
+			cleanHex = cleanHex[2:]
+		}
+
+		encryptedValue, err := p.fromHexString(cleanHex)
+		if err != nil {
+			return nil, err
+		}
+
+		// Decrypt the data
+		decryptedData, err := aes256.Decrypt(encryptedValue, p.secret)
+		if err != nil {
+			return nil, NewPowerKvError("ServerError", fmt.Sprintf("Decryption failed: %v", err))
+		}
+
+		// Unpack the data to get original key and data
+		_, actualData, err := p.unpackData(decryptedData)
+		if err != nil {
+			return nil, err
+		}
+
+		return actualData, nil
 	}
 
 	// Parse error message
